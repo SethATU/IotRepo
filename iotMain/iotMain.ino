@@ -36,5 +36,7 @@ void keyPad() {
 
   if (key) {
     Serial.println(key); //keypad, test code
+    lcd.clear();  //clear lcd screen
+    lcd.print(key); //keypad, print text on lcdscreen
   }
 }
