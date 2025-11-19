@@ -1,7 +1,25 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 #include <Wire.h>     //lcd
 #include "rgb_lcd.h"  //lcd
 #include <Keypad.h>   //keypad
+=======
+#include <Wire.h>      //lcd
+#include "rgb_lcd.h"   //lcd
+#include <Keypad.h>    //keypad
+#include <SPI.h>       //rfid
+#include <MFRC552.h>   //rfid
+//#include <webpage.h> //webpage
+
+#define ROW       4  //keypad
+#define COLUMN    3  //keypad
+#define BUZZ      32 //buzzer
+#define SS_RFID   21 //rfid
+#define RDT_RFID  22 //rfid
+#define SCK_RFID  25 //rfid
+#define MOSI_RFID 26 //rfid
+#define MISO_RFID 27 //rfid
+>>>>>>> Stashed changes
 
 rgb_lcd lcd; //lcd
 =======
@@ -63,7 +81,10 @@ void setup()
 void loop() {
   keyPad();
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 
   if(alarmStatus == 0) {
     lcd.clear();
