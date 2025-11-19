@@ -3,12 +3,17 @@
 #include <Keypad.h>   //keypad
 //#include <webpage.h>  //webpage
 
-rgb_lcd lcd; //lcd
-
 #define ROW 4     //keypad
 #define COLUMN 3  //keypad
 #define BUZZ 32   //buzzer
 
+rgb_lcd lcd; //lcd
+
+const int TRIG = 14;  //distance
+const int ECHO = 34;  //distance
+
+long dura;                      //distance
+float dist;                     //distance
 int passCode[4] = {1, 2, 3, 4}; //keypad
 int passCodeEntered[4];         //keypad
 int passCodeWrong = 0;          //keypad
@@ -34,6 +39,8 @@ void setup()
   lcd.begin(16, 2);   //lcd
 
   pinMode(BUZZ, OUTPUT);  //buzzer 
+  pinMode(TRIG, OUTPUT);  //distance
+  pinMode(ECHO, INPUT);   //distance
 
   lcd.print("Hello ESP32!"); //lcd, test code
   delay(1000);
@@ -43,6 +50,7 @@ void setup()
 void loop() 
 {
   keyPad();
+  distance();
 }
 
 void keyPad() //keypad function
@@ -114,4 +122,24 @@ void buzzer() //buzzer function
     digitalWrite(BUZZ, LOW);
     delay(250);
   }
+}
+
+void distance() //distance function
+{
+  digitalWrite(TRIG, LOW);
+  delayMicroseconds(5);
+
+  digitalWrite(TRIG, HIGH);
+  delayMicroseconds(10);
+
+  digitalWrite(TRIG, LOW);
+
+  dura = pulseIn(ECHO, HIGH);
+  dist = (dura * 0.0343) / 2; //convert to cm
+
+  Serial.print("Dist:"); 
+  Serial.print(dist);
+  Serial.print("Cm\n");
+  
+  delay(1000);
 }
