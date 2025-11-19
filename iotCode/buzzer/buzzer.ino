@@ -1,5 +1,5 @@
 #define BUZZ 32
-
+int passCodeWrong = 0;
 void setup() {
   pinMode(BUZZER, OUTPUT);
 }
