@@ -1,9 +1,3 @@
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-#include <Wire.h>     //lcd
-#include "rgb_lcd.h"  //lcd
-#include <Keypad.h>   //keypad
-=======
 #include <Wire.h>      //lcd
 #include "rgb_lcd.h"   //lcd
 #include <Keypad.h>    //keypad
@@ -19,27 +13,14 @@
 #define SCK_RFID  25 //rfid
 #define MOSI_RFID 26 //rfid
 #define MISO_RFID 27 //rfid
->>>>>>> Stashed changes
 
 rgb_lcd lcd; //lcd
-=======
-#include <Wire.h>      //lcd
-#include "rgb_lcd.h"   //lcd
-#include <Keypad.h>    //keypad
-#include <SPI.h>       //rfid
-#include <MFRC552.h>   //rfid
-//#include <webpage.h> //webpage
->>>>>>> Stashed changes
 
-#define ROW       4  //keypad
-#define COLUMN    3  //keypad
-#define BUZZ      32 //buzzer
-#define SS_RFID   21 //rfid
-#define RDT_RFID  22 //rfid
-#define SCK_RFID  25 //rfid
-#define MOSI_RFID 26 //rfid
-#define MISO_RFID 27 //rfid
+const int TRIG = 14;  //distance
+const int ECHO = 34;  //distance
 
+long dura;                      //distance
+float dist;                     //distance
 int passCode[4] = {1, 2, 3, 4}; //keypad
 int passCodeEntered[4];         //keypad
 int passCodeWrong = 0;          //keypad
@@ -70,6 +51,8 @@ void setup()
   SPI.begin(SCK_RFID, MISO_RFID, MOSI_RFID, SS_RFID); //rfid
 
   pinMode(BUZZ, OUTPUT);  //buzzer 
+  pinMode(TRIG, OUTPUT);  //distance
+  pinMode(ECHO, INPUT);   //distance
 
   rfid.PCD_Init();  
 
@@ -80,11 +63,6 @@ void setup()
 
 void loop() {
   keyPad();
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
 
   if(alarmStatus == 0) {
     lcd.clear();
@@ -92,9 +70,7 @@ void loop() {
     lcd.setCursor(0, 1);
     
   }
-  
-  
-  //alarm status - unarmed 
+   //alarm status - unarmed 
   //show status then option to enter code to arm alarm 
     //correct code - alarm armed 
     //wrong code - try again
@@ -109,7 +85,6 @@ void loop() {
   //alarm status - aremed 
   //if distance is < 50cm
     //start 30 second timer and then buzzer goes off 
->>>>>>> Stashed changes
 }
 
 void keyPad() //keypad function
@@ -181,4 +156,24 @@ void buzzer() //buzzer function
     digitalWrite(BUZZ, LOW);
     delay(250);
   }
+}
+
+void distance() //distance function
+{
+  digitalWrite(TRIG, LOW);
+  delayMicroseconds(5);
+
+  digitalWrite(TRIG, HIGH);
+  delayMicroseconds(10);
+
+  digitalWrite(TRIG, LOW);
+
+  dura = pulseIn(ECHO, HIGH);
+  dist = (dura * 0.0343) / 2; //convert to cm
+
+  Serial.print("Dist:"); 
+  Serial.print(dist);
+  Serial.print("Cm\n");
+  
+  delay(1000);
 }
