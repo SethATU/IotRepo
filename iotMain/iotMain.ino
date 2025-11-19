@@ -1,11 +1,18 @@
-#include <Wire.h>     //lcd
-#include "rgb_lcd.h"  //lcd
-#include <Keypad.h>   //keypad
-//#include <webpage.h>  //webpage
+#include <Wire.h>      //lcd
+#include "rgb_lcd.h"   //lcd
+#include <Keypad.h>    //keypad
+#include <SPI.h>       //rfid
+#include <MFRC552.h>   //rfid
+//#include <webpage.h> //webpage
 
-#define ROW 4     //keypad
-#define COLUMN 3  //keypad
-#define BUZZ 32   //buzzer
+#define ROW       4  //keypad
+#define COLUMN    3  //keypad
+#define BUZZ      32 //buzzer
+#define SS_RFID   21 //rfid
+#define RDT_RFID  22 //rfid
+#define SCK_RFID  25 //rfid
+#define MOSI_RFID 26 //rfid
+#define MISO_RFID 27 //rfid
 
 rgb_lcd lcd; //lcd
 
@@ -25,9 +32,13 @@ char keys[ROW][COLUMN] =  {     //keypad
   {'7', '8', '9'},
   {'*', '0', '#'}
 };
+int alarmStatus = 0;  //alarm
+
+MFRC522 rfid(SS_RFID, RST_RFID);  //rfid
 
 byte pin_rows[ROW] = {2, 0, 4, 16}; //keypad
 byte pin_column[COLUMN] = {17, 5, 18};  //keypad
+byte nuidPICC[4]; //rfid
 
 Keypad keypad = Keypad( makeKeymap(keys), pin_rows, pin_column, ROW, COLUMN);  //keypad
 
@@ -37,20 +48,29 @@ void setup()
 
   Wire.begin(19, 23); //lcd
   lcd.begin(16, 2);   //lcd
+  SPI.begin(SCK_RFID, MISO_RFID, MOSI_RFID, SS_RFID); //rfid
 
   pinMode(BUZZ, OUTPUT);  //buzzer 
   pinMode(TRIG, OUTPUT);  //distance
   pinMode(ECHO, INPUT);   //distance
 
-  lcd.print("Hello ESP32!"); //lcd, test code
-  delay(1000);
-  lcd.clear();
+  rfid.PCD_Init();  
+
+  //lcd.print("Hello ESP32!"); //lcd, test code
+  //delay(1000);
+  //lcd.clear();
 }
 
-void loop() 
-{
+void loop() {
   keyPad();
-  //alarm status - unarmed 
+
+  if(alarmStatus == 0) {
+    lcd.clear();
+    lcd.print("Alarm: Unarmed");
+    lcd.setCursor(0, 1);
+    
+  }
+   //alarm status - unarmed 
   //show status then option to enter code to arm alarm 
     //correct code - alarm armed 
     //wrong code - try again
@@ -99,7 +119,7 @@ void keyPad() //keypad function
   }
 }
 
-void checkCode()  //checks the code is correct 
+void checkCode()  //checks the pass code is correct 
 {
   passCodeWrong = 0;
 
