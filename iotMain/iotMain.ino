@@ -50,7 +50,21 @@ void setup()
 void loop() 
 {
   keyPad();
-  distance();
+  //alarm status - unarmed 
+  //show status then option to enter code to arm alarm 
+    //correct code - alarm armed 
+    //wrong code - try again
+  //tap card - press * to arm # to cancile 
+
+  //alarm ststus - armed
+  //show status then option to enter code to disarm arm alarm
+    //pin wrong 3x alarm goes off
+    //pin correct alarm unarmed 
+  //tap card to dissarm alarm 
+
+  //alarm status - aremed 
+  //if distance is < 50cm
+    //start 30 second timer and then buzzer goes off 
 }
 
 void keyPad() //keypad function
