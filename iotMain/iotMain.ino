@@ -11,6 +11,8 @@ rgb_lcd lcd; //lcd
 int passCode[4] = {1, 2, 3, 4}; //keypad
 int passCodeEntered[4];         //keypad
 int passCodeWrong = 0;          //keypad
+int keyIndex = 0;               //keypad
+bool prompt = true;             //keypad
 char keys[ROW][COLUMN] =  {     //keypad
   {'1', '2', '3'},
   {'4', '5', '6'},
@@ -33,70 +35,82 @@ void setup()
   pinMode(BUZZ, OUTPUT);  //buzzer 
 
   lcd.print("Hello ESP32!"); //lcd, test code
+  delay(1000);
+  lcd.clear();
 }
 
 void loop() 
 {
-  lcd.clear();
   keyPad();
 }
 
 void keyPad() //keypad function
 {
-  int keyPress = 0;
   char key = keypad.getKey();
 
-  lcd.println("Enter Code\n");
+  if (keyIndex == 0 && prompt)
+  {
+    lcd.clear();
+    lcd.print("Enter Code:");  
+    lcd.setCursor(0, 1);
+    prompt = false;
+  }
+  
   if(key)
   {
-    Serial.print(key); //keypad, test code
-    lcd.print(key); //keypad, print text on lcdscreen
+    if (key >= '0' && key <= '9')
+    {
+      lcd.print(key); //keypad, print text on lcdscreen
+      passCodeEntered[keyIndex] = key - '0';
+      keyIndex++;
+    }
 
-    passCodeEntered[keyPress] = key - '0';
-    keyPress++;
+    if (keyIndex == 4)
+    {
+      checkCode();
+      keyIndex = 0;
+      prompt = true;
+      delay(1500);
+      lcd.clear();
+    }
+  }
+}
+
+void checkCode()  //checks the code is correct 
+{
+  passCodeWrong = 0;
+
+  for(int i = 0; i < 4; i++)
+  {
+    if (passCodeEntered[i] != passCode[i])
+    {
+      passCodeWrong++;
+    }
   }
 
-  if (keyPress == 4)
+  if (passCodeWrong == 0)
   {
-    passCodeWrong = 0;
-
-    for(int i = 0; i < 4; i++)
-    {
-      if (passCodeEntered[i] != passCode[i])
-      {
-        passCodeWrong++;
-      }
-    }
-
-    if (passCodeWrong == 0)
-    {
-      lcd.clear();
-      lcd.print("Correct");
-      Serial.println("Correct");
-    }
-    else 
-    {
-      buzzer();
-    }
-
-    keyPress = 0;
+    delay(1000);
     lcd.clear();
+    lcd.print("Correct");
+  }
+  else
+  {
+    buzzer();
   }
 }
 
 void buzzer() //buzzer function
 {
-  if(passCodeWrong > 0)
+  delay(1000);
+  lcd.clear();
+  lcd.print("Incorrect");    //lcd
+  
+  for(int i = 0; i < 40; i++)
   {
-    lcd.clear();
-    lcd.print("Incorrect pass code! Alarm on");    //lcd
-    Serial.print("Incorrect pass code! Alarm on"); //lcd, test code
-    for(int i = 0; i < 40; i++)
-    {
-      digitalWrite(BUZZ, HIGH);
-      delay(250);
-      digitalWrite(BUZZ, LOW);
-      delay(250);
-    }
+    digitalWrite(BUZZ, HIGH);
+    delay(250);
+    digitalWrite(BUZZ, LOW);
+    delay(250);
   }
 }
