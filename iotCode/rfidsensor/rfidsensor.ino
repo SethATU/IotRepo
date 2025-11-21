@@ -13,27 +13,28 @@ MFRC522 rfid(SS_PIN, RST_PIN); // Instance of the class
 // Init array that will store new NUID 
 byte nuidPICC[4];
 
-void setup() { 
-  Serial.begin(9600);
-  
-  // Initialize SPI with custom pins
-  SPI.begin(SCK_PIN, MISO_PIN, MOSI_PIN, SS_PIN);
-  
-  // Initialize MFRC522
-  rfid.PCD_Init();
+byte unlockCard[4] = {0x65, 0x74, 0x4D, 0x05};
 
-  Serial.println(F("This code scans the MIFARE Classic NUID."));
+void setup() { 
+  Serial.begin(115200);
+  SPI.begin(SCK_PIN, MISO_PIN, MOSI_PIN, SS_PIN);
+  rfid.PCD_Init();
+  Serial.println("Scan a card");
 }
  
 void loop() {
-  // Wait for a new card
-  if (!rfid.PICC_IsNewCardPresent())
-    return;
+  if (!rfid.PICC_IsNewCardPresent()) return;
+  if (!rfid.PICC_ReadCardSerial()) return;
 
-  // Select one of the cards
-  if (!rfid.PICC_ReadCardSerial())
-    return;
+  if (memcmp(rfid.uid.uidByte, unlockCard, 4) == 0) {
+    Serial.println("Card Matches");
+  }
+  else {
+    Serial.println("Crad does not match");
+  }
+  delay(1000);
 
+/*
   Serial.print(F("PICC type: "));
   MFRC522::PICC_Type piccType = rfid.PICC_GetType(rfid.uid.sak);
   Serial.println(rfid.PICC_GetTypeName(piccType));
@@ -56,18 +57,19 @@ void loop() {
     Serial.print(F("In dec: "));
     printDec(rfid.uid.uidByte, rfid.uid.size);
     Serial.println();
-  } else {
-    Serial.println(F("Card read previously."));
-  }
+  } //else {
+    //Serial.println(F("Card read previously."));
+  //}
 
   // Halt PICC
   rfid.PICC_HaltA();
   rfid.PCD_StopCrypto1();
+  */
 }
 
-/**
- * Helper routine to dump a byte array as hex values to Serial. 
- */
+/*
+
+//Helper routine to dump a byte array as hex values to Serial. 
 void printHex(byte *buffer, byte bufferSize) {
   for (byte i = 0; i < bufferSize; i++) {
     Serial.print(buffer[i] < 0x10 ? " 0" : " ");
@@ -75,13 +77,12 @@ void printHex(byte *buffer, byte bufferSize) {
   }
 }
 
-/**
- * Helper routine to dump a byte array as dec values to Serial.
- */
+
+//Helper routine to dump a byte array as dec values to Serial.
 void printDec(byte *buffer, byte bufferSize) {
   for (byte i = 0; i < bufferSize; i++) {
     Serial.print(' ');
     Serial.print(buffer[i], DEC);
   }
 }
-
+*/
