@@ -33,6 +33,9 @@ char keys[ROW][COLUMN] =  {     //keypad
   {'7', '8', '9'},
   {'*', '0', '#'}
 };
+int alarmStatus = 0;  //alarm
+
+MFRC522 rfid(SS_RFID, RST_RFID);  //rfid
 
 byte pin_rows[ROW] = {2, 0, 4, 16}; //keypad
 byte pin_column[COLUMN] = {17, 5, 18};  //keypad
@@ -60,7 +63,14 @@ void setup() {
 
 void loop() {
   keyPad();
-  //alarm status - unarmed 
+
+  if(alarmStatus == 0) {
+    lcd.clear();
+    lcd.print("Alarm: Unarmed");
+    lcd.setCursor(0, 1);
+    
+  }
+   //alarm status - unarmed 
   //show status then option to enter code to arm alarm 
     //correct code - alarm armed 
     //wrong code - try again
