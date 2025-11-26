@@ -8,11 +8,13 @@
 #define ROW 4     //keypad
 #define COLUMN 3  //keypad
 #define BUZZ 32   //buzzer
+/*
 #define SS_PIN   21 //rfid
 #define RST_PIN  22 //rfid
 #define SCK_PIN  25 //rfid
 #define MOSI_PIN 26 //rfid  
 #define MISO_PIN 27 //rfid
+*/
 
 rgb_lcd lcd; //lcd
 
@@ -25,7 +27,7 @@ int passCode[4] = {1, 2, 3, 4}; //keypad
 int passCodeEntered[4];         //keypad
 int passCodeWrong = 0;          //keypad
 int keyIndex = 0;               //keypad
-int atempt = 0;
+int atempt = 3;                 //keypad
 bool prompt = true;             //keypad
 char keys[ROW][COLUMN] =  {     //keypad
   {'1', '2', '3'},
@@ -33,9 +35,9 @@ char keys[ROW][COLUMN] =  {     //keypad
   {'7', '8', '9'},
   {'*', '0', '#'}
 };
-int alarmStatus = 0;  //alarm
+int alarmStatus = 0;  //alarm - 0-off / 1-on
 
-MFRC522 rfid(SS_RFID, RST_RFID);  //rfid
+//MFRC522 rfid(SS_RFID, RST_RFID);  //rfid
 
 byte pin_rows[ROW] = {2, 0, 4, 16}; //keypad
 byte pin_column[COLUMN] = {17, 5, 18};  //keypad
@@ -48,65 +50,51 @@ void setup() {
 
   Wire.begin(19, 23); //lcd
   lcd.begin(16, 2);   //lcd
-  SPI.begin(SCK_PIN, MISO_PIN, MOSI_PIN, SS_PIN); //rfid
+  //SPI.begin(SCK_PIN, MISO_PIN, MOSI_PIN, SS_PIN); //rfid
 
   pinMode(BUZZ, OUTPUT);  //buzzer 
   pinMode(TRIG, OUTPUT);  //distance
   pinMode(ECHO, INPUT);   //distance
 
-  rfid.PCD_Init();  //rfid
+  //rfid.PCD_Init();  //rfid
 
-  lcd.print("Hello ESP32!"); //lcd, test code
-  delay(1000);
-  lcd.clear();
+  lcd.print("Loading");
+  for (int l = 0; l < 10; l++)
+  {
+    lcd.print(".");
+    delay(1000);
+  }
 }
 
 void loop() {
   keyPad();
+  //check alarm_status()
 
-  if(alarmStatus == 0) {
-    lcd.clear();
-    lcd.print("Alarm: Unarmed");
-    lcd.setCursor(0, 1);
-    
-  }
-   //alarm status - unarmed 
-  //show status then option to enter code to arm alarm 
-    //correct code - alarm armed 
-    //wrong code - try again
-  //tap card - press * to arm # to cancile 
+  //if alarm_statsu() is armed 
+    //inside keypad()
 
-  //alarm ststus - armed
-  //show status then option to enter code to disarm arm alarm
-    //pin wrong 3x alarm goes off
-    //pin correct alarm unarmed 
-  //tap card to dissarm alarm 
-
-  //alarm status - aremed 
-  //if distance is < 50cm
-    //start 30 second timer and then buzzer goes off 
+  //if alarm_status() is unarmed
+    //inside keypad()
 }
 
 void keyPad() { //keypad function
   char key = keypad.getKey();
-  atempt = 0;
+
   if (keyIndex == 0 && prompt) {
-    if (alarmStatus == 0) {
-      lcd.clear();
-      lcd.print("Alarm Disabled.")
-      lcd.clear();
-      lcd.print("Enter Code:");  
-      lcd.setCursor(0, 1);
-      prompt = false;
+    lcd.clear();
+
+    if (alarmStatus == 0) { 
+      lcd.print("Alarm Disabled."); 
     }
-    else {
-      lcd.clear();
-      lcd.print("Alarm Active.")
-      lcd.clear();
-      lcd.print("Enter Code:");  
-      lcd.setCursor(0, 1);
-      prompt = false;
+    else { 
+      lcd.print("Alarm Active."); 
     }
+
+    delay(2500);
+    lcd.setCursor(0, 1);
+    lcd.print("Enter Code: ");  
+
+    prompt = false;
   }
   
   if(key) {
@@ -135,27 +123,67 @@ void checkCode() {  //checks the pass code is correct
     }
   }
 
+  if (passCodeWrong > 0 && alarmStatus == 1)
+  {
+    atempt--;
+  }
+
   if (passCodeWrong == 0) {
     delay(1000);
     lcd.clear();
-    lcd.print("Correct");
+    lcd.print("Correct.");
+    delay(5000);
+    atempt = 3;
+    if (alarmStatus == 1)
+    {
+      alarmStatus = 0;
+    }
+    else 
+    {
+      alarmStatus = 1;
+    }
+    
   }
-  else {
+  else if (passCodeWrong > 0 && atempt > 0 && alarmStatus == 0) {
+    delay(1000);
+    lcd.clear();
+    lcd.print("Incorrect.");
+    lcd.setCursor(0, 1);
+    lcd.print("Try Again.");
+    delay(5000);
+    alarmStatus = 0;
+  }
+  else if (passCodeWrong > 0 && atempt == 0) {
+    delay(1000);
+    lcd.clear();
+    lcd.print("Incorrect.");
+    lcd.setCursor(0, 1);
+    lcd.print("Sounding Alarm!");
+    delay(5000);    
     buzzer();
+    alarmStatus = 1;
+  }
+  else
+  {
+    delay(1000);
+    lcd.clear();
+    lcd.print("Incorrect.");
+    lcd.setCursor(0, 1);
+    lcd.print(atempt);
+    lcd.print(" Attempts Left");
+    delay(5000);
   }
 }
 
 void buzzer() { //buzzer function
-  delay(1000);
-  lcd.clear();
-  lcd.print("Incorrect");    //lcd
-  
   for(int i = 0; i < 40; i++) {
     digitalWrite(BUZZ, HIGH);
     delay(250);
     digitalWrite(BUZZ, LOW);
     delay(250);
   }
+  lcd.clear();
+  atempt = 1;
 }
 
 void distance() { //distance function
@@ -176,7 +204,7 @@ void distance() { //distance function
   
   delay(1000);
 }
-
+/*
 void rfid() {
   if (!rfid.PICC_IsNewCardPresent()) return;
   if (!rfid.PICC_ReadCardSerial()) return;
@@ -189,3 +217,4 @@ void rfid() {
   }
   delay(1000);
 }
+*/
