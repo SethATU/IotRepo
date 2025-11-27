@@ -16,11 +16,15 @@
 
 rgb_lcd lcd; //lcd
 
+
+unsigned long lastDistance = 0;         //distance
+
 const int TRIG = 14;  //distance
 const int ECHO = 34;  //distance
 
 long dura;                      //distance
 float dist;                     //distance
+int distanceCheck = 20;         //distance
 int passCode[4] = {1, 2, 3, 4}; //keypad
 int passCodeEntered[4];         //keypad
 int passCodeWrong = 0;          //keypad
@@ -56,33 +60,32 @@ void setup() {
 
   rfid.PCD_Init();  //rfid
 
-  lcd.print("Loading");
-  for (int l = 0; l < 9; l++)
-  {
+  lcd.print("Loading"); //little loading bar printed to lcd
+  for (int l = 0; l < 9; l++) {
     lcd.print(".");
-    delay(1000);
+    delay(250);
   }
 }
 
 void loop() {
   keyPad();
+  distance();
 }
 
 void keyPad() { //keypad function
-  card = 0;
   char key = keypad.getKey();
 
   if (keyIndex == 0 && prompt) {
     lcd.clear();
 
     if (alarmStatus == 0) { 
-      lcd.print("Alarm Disabled."); 
+      lcd.print("Alarm Disabled//#"); 
     }
     else { 
-      lcd.print("Alarm Active."); 
+      lcd.print("Alarm Active  //#"); 
     }
 
-    delay(2500);
+    delay(500);
     lcd.setCursor(0, 1);
     lcd.print("Enter Code: ");  
     prompt = false;
@@ -94,8 +97,8 @@ void keyPad() { //keypad function
       passCodeEntered[keyIndex] = key - '0';
       keyIndex++;
     }
-    if (key == '#')
-    {
+    if (key == '#') {
+      delay(500);
       rfidFunction();
       return;
     }
@@ -104,7 +107,7 @@ void keyPad() { //keypad function
       checkCode();
       keyIndex = 0;
       prompt = true;
-      delay(1500);
+      delay(500);
       lcd.clear();
     }
   }
@@ -119,8 +122,7 @@ void checkCode() {  //checks the pass code is correct
     }
   }
 
-  if (passCodeWrong > 0 && alarmStatus == 1)
-  {
+  if (passCodeWrong > 0 && alarmStatus == 1) {
     atempt--;
   }
 
@@ -128,14 +130,12 @@ void checkCode() {  //checks the pass code is correct
     delay(1000);
     lcd.clear();
     lcd.print("Correct.");
-    delay(5000);
+    delay(2500);
     atempt = 3;
-    if (alarmStatus == 1)
-    {
+    if (alarmStatus == 1) {
       alarmStatus = 0;
     }
-    else 
-    {
+    else {
       alarmStatus = 1;
     } 
   }
@@ -145,7 +145,7 @@ void checkCode() {  //checks the pass code is correct
     lcd.print("Incorrect.");
     lcd.setCursor(0, 1);
     lcd.print("Try Again.");
-    delay(5000);
+    delay(2500);
     alarmStatus = 0;
   }
   else if (passCodeWrong > 0 && atempt == 0) {
@@ -153,10 +153,8 @@ void checkCode() {  //checks the pass code is correct
     lcd.clear();
     lcd.print("Incorrect.");
     lcd.setCursor(0, 1);
-    lcd.print("Sounding Alarm!");
-    delay(5000);    
+    lcd.print("Sounding Alarm!");   
     buzzer();
-    alarmStatus = 1;
   }
   else
   {
@@ -166,7 +164,7 @@ void checkCode() {  //checks the pass code is correct
     lcd.setCursor(0, 1);
     lcd.print(atempt);
     lcd.print(" Attempts Left");
-    delay(5000);
+    delay(2500);
   }
 }
 
@@ -179,25 +177,37 @@ void buzzer() { //buzzer function
   }
   lcd.clear();
   atempt = 1;
+  keyIndex = 0;
+  alarmStatus = 1;
+  prompt = true;
 }
 
 void distance() { //distance function
-  digitalWrite(TRIG, LOW);
-  delayMicroseconds(5);
+  unsigned long currentMillis = millis(); 
 
-  digitalWrite(TRIG, HIGH);
-  delayMicroseconds(10);
+  if (currentMillis - lastDistance >= 200) {
+    lastDistance = currentMillis;
 
-  digitalWrite(TRIG, LOW);
+    digitalWrite(TRIG, LOW);
+    delayMicroseconds(5);
+    digitalWrite(TRIG, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(TRIG, LOW);
 
-  dura = pulseIn(ECHO, HIGH);
-  dist = (dura * 0.0343) / 2; //convert to cm
+    dura = pulseIn(ECHO, HIGH, 20000); //timeout after 20ms
+    dist = (dura * 0.0343) / 2; //convert to cm
 
-  Serial.print("Dist:"); 
-  Serial.print(dist);
-  Serial.print("Cm\n");
-  
-  delay(1000);
+    if (dura == 0) return;
+    if (dist > 0 && dist < distanceCheck) {
+      if (alarmStatus == 1) {
+        lcd.clear();
+        lcd.print("Movement!");
+        lcd.setCursor(0, 1);
+        lcd.print("Sounding Alarm.");
+        buzzer();
+      }
+    }
+  }
 }
 
 void rfidFunction() {
@@ -210,12 +220,10 @@ void rfidFunction() {
 
   if (memcmp(rfid.uid.uidByte, unlockCard, 4) == 0) {
     lcd.print("Card Matches");
-    if (alarmStatus == 1)
-    {
+    if (alarmStatus == 1) {
       alarmStatus = 0;
     }
-    else 
-    {
+    else {
       alarmStatus = 1;
     } 
   }
@@ -223,7 +231,7 @@ void rfidFunction() {
     lcd.print("Crad does not match");
   }
   
-  delay(5000);
+  delay(2500);
   lcd.clear();
   keyIndex = 0;
   prompt = true;
