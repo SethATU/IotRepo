@@ -8,13 +8,11 @@
 #define ROW 4     //keypad
 #define COLUMN 3  //keypad
 #define BUZZ 32   //buzzer
-/*
-#define SS_PIN   21 //rfid
-#define RST_PIN  22 //rfid
-#define SCK_PIN  25 //rfid
-#define MOSI_PIN 26 //rfid  
-#define MISO_PIN 27 //rfid
-*/
+#define SS_RFID   21 //rfid
+#define RST_RFID  22 //rfid
+#define SCK_RFID  25 //rfid
+#define MOSI_RFID 26 //rfid  
+#define MISO_RFID 27 //rfid
 
 rgb_lcd lcd; //lcd
 
@@ -37,11 +35,11 @@ char keys[ROW][COLUMN] =  {     //keypad
 };
 int alarmStatus = 0;  //alarm - 0-off / 1-on
 
-//MFRC522 rfid(SS_RFID, RST_RFID);  //rfid
+MFRC522 rfid(SS_RFID, RST_RFID);  //rfid
 
-byte pin_rows[ROW] = {2, 0, 4, 16}; //keypad
-byte pin_column[COLUMN] = {17, 5, 18};  //keypad
-byte unlockCard[4] = {0x65, 0x74, 0x4D, 0x05};
+byte pin_rows[ROW] = {2, 0, 4, 16};             //keypad
+byte pin_column[COLUMN] = {17, 5, 18};          //keypad
+byte unlockCard[4] = {0x65, 0x74, 0x4D, 0x05};  //rfid - hex code for saved card
 
 Keypad keypad = Keypad( makeKeymap(keys), pin_rows, pin_column, ROW, COLUMN);  //keypad
 
@@ -50,16 +48,16 @@ void setup() {
 
   Wire.begin(19, 23); //lcd
   lcd.begin(16, 2);   //lcd
-  //SPI.begin(SCK_PIN, MISO_PIN, MOSI_PIN, SS_PIN); //rfid
+  SPI.begin(SCK_RFID, MISO_RFID, MOSI_RFID, SS_RFID); //rfid
 
   pinMode(BUZZ, OUTPUT);  //buzzer 
   pinMode(TRIG, OUTPUT);  //distance
   pinMode(ECHO, INPUT);   //distance
 
-  //rfid.PCD_Init();  //rfid
+  rfid.PCD_Init();  //rfid
 
   lcd.print("Loading");
-  for (int l = 0; l < 10; l++)
+  for (int l = 0; l < 9; l++)
   {
     lcd.print(".");
     delay(1000);
@@ -68,16 +66,10 @@ void setup() {
 
 void loop() {
   keyPad();
-  //check alarm_status()
-
-  //if alarm_statsu() is armed 
-    //inside keypad()
-
-  //if alarm_status() is unarmed
-    //inside keypad()
 }
 
 void keyPad() { //keypad function
+  card = 0;
   char key = keypad.getKey();
 
   if (keyIndex == 0 && prompt) {
@@ -93,7 +85,6 @@ void keyPad() { //keypad function
     delay(2500);
     lcd.setCursor(0, 1);
     lcd.print("Enter Code: ");  
-
     prompt = false;
   }
   
@@ -102,6 +93,11 @@ void keyPad() { //keypad function
       lcd.print(key); //keypad, print text on lcdscreen
       passCodeEntered[keyIndex] = key - '0';
       keyIndex++;
+    }
+    if (key == '#')
+    {
+      rfidFunction();
+      return;
     }
 
     if (keyIndex == 4) {
@@ -141,8 +137,7 @@ void checkCode() {  //checks the pass code is correct
     else 
     {
       alarmStatus = 1;
-    }
-    
+    } 
   }
   else if (passCodeWrong > 0 && atempt > 0 && alarmStatus == 0) {
     delay(1000);
@@ -204,17 +199,34 @@ void distance() { //distance function
   
   delay(1000);
 }
-/*
-void rfid() {
-  if (!rfid.PICC_IsNewCardPresent()) return;
-  if (!rfid.PICC_ReadCardSerial()) return;
+
+void rfidFunction() {
+  lcd.clear();
+  lcd.print("Scan Card.");
+  lcd.setCursor(0, 1);
+
+  while (!rfid.PICC_IsNewCardPresent()) { delay(10); } 
+  while (!rfid.PICC_ReadCardSerial()) { delay(10); }
 
   if (memcmp(rfid.uid.uidByte, unlockCard, 4) == 0) {
-    Serial.println("Card Matches");
+    lcd.print("Card Matches");
+    if (alarmStatus == 1)
+    {
+      alarmStatus = 0;
+    }
+    else 
+    {
+      alarmStatus = 1;
+    } 
   }
   else {
-    Serial.println("Crad does not match");
+    lcd.print("Crad does not match");
   }
-  delay(1000);
+  
+  delay(5000);
+  lcd.clear();
+  keyIndex = 0;
+  prompt = true;
+
+  return;
 }
-*/
