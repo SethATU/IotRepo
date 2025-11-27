@@ -44,18 +44,16 @@
     }
     .item {
       border: 2px solid black;
-      width: 250px;
-      height: 400px;
+      width: 400px;
+      height: 500px;
       background-color: rgba(235, 38, 12, 0.5);
       margin-bottom: 75px;
     }
-    .item1 {
-      border-bottom: 2px solid black;
-      width: 250px;
-      height: 199px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .item2 {
+      border: 3px solid black;
+      margin: 10px;
+      border-radius: 5px;
+      background-color: rgba(235, 38, 12, 0.5);
     }
     h1 {
       font: bold;
@@ -71,10 +69,10 @@
       text-align: center;
     }
     button {
-      padding: 15px 30px;
+      padding: 30px 55.5px;
       border-radius: 10px;
       border-color: rgb(145, 24, 24);
-      font-size: medium;
+      font-size: x-large;
       font-weight: bold;
       text-decoration: none;
       background-color: rgba(163, 44, 1, 0.5);
@@ -83,74 +81,53 @@
       background-color: rgba(163, 44, 1, 1.0);
       cursor: pointer;
     }
-    #message {
-      border: 3px solid black;
-      padding: 15px;
-      margin: 15px;
-      border-radius: 5px;
-      background-color: rgba(235, 38, 12, 0.5);
-    }
-    #message_alarm {
-      border: 3px solid black;
-      height: 275px;
-      margin: 15px;
-      border-radius: 5px;
-      background-color: rgba(235, 38, 12, 0.5);
-      
-    }
   </style>
 
   <body>
     <div class="header">
-        <h1>- - - Security System WebServer - - -</h1>
+        <h1>- - - Security System Keypad - - -</h1>
     </div>
 
     <br><br><br><br><br><br><br>
 
     <div class="container">
       <div class="item">
-        <h1>- Message -</h1>
-        <p id="message_alarm">Arm the alarm</p>
+        <table>
+          <tr>
+            <th><button>1</button></th>
+            <th><button>2</button></th>
+            <th><button>3</button></th>
+          </tr>
+          <tr>
+            <th><button>4</button></th>
+            <th><button>5</button></th>
+            <th><button>6</button></th>
+          </tr>
+          <tr>
+            <th><button>7</button></th>
+            <th><button>8</button></th>
+            <th><button>9</button></th>
+          </tr>
+          <tr>
+            <th><button>*</button></th>
+            <th><button>0</button></th>
+            <th><button>#</button></th>
+          </tr>
+        </table>
+        <div class="item2">
+          <p>1 2 3 4</p>
+        </div>
       </div>
 
-      <div class="item">
-        <h1>- Distance -</h1>
-        <p id="message">123.45Cm</p>
-        <br><br><br><br><br><br>
-        <p id="message">Safe</p>
-      </div>
-
-      <div class="item">
-        <div class="item1">
-          <h1>- Keypad -</h1>
-          <a href="keypad.html" target="_self">
-            <button>Enter Pin</button>
-          </a>
-        </div>
-        <div class="item1">
-            <h1>- KeyCard -</h1>
-            <p id="message">User Name</p>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item1">
-          <h1>- Location -</h1>
-          <a href="location.html" target="_self">
-            <button>View Location</button>
-          </a>
-        </div>
-        <div class="item1">
-            <h1>- Camera -</h1>
-            <a href="camera.html" target="_self">
-            <button>View Camera</button>
-          </a>
-        </div>
+      <div id="back">
+        <a href="webpage.h" target="_self">
+          <button>Go Home</button>
+        </a>
       </div>
     </div>
-
+    
     <div class="footer">
-        <p id="copy">Copyright &copy; 2025 Seth Butler</p>
+      <p id="copy">Copyright &copy; 2025 Seth Butler</p>
     </div>
 
   </body>
