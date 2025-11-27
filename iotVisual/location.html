@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0", viewpoint-fir="cover">
+    
+    <title>Security system WebServer</title>
+</head>
+  <style>
+    body {
+      background-image: url(background.jpg);
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-size: 100% 100%;
+    }
+    .header {
+      display: flex;
+      flex-direction: column;
+      background-color: color-mix(in oklab, black 25%, white);
+      align-items: center;
+      border: 2px solid black; 
+    }
+    .footer {
+      display: flex;
+      background-color: color-mix(in oklab, black 25%, white);
+      align-items: center;
+      border: 2px solid black;
+      height: 25px;
+      justify-content: center;
+      z-index: 1000;
+      position: fixed;
+      bottom: 10px;
+      padding: 10px;
+    }
+    #copy {
+      font-size: 20px;
+    }
+    .container {
+      display: flex;
+      flex-direction: row;
+      align-items:center;
+      justify-content: space-evenly;
+      flex-wrap: wrap;
+    }
+    .item {
+      border: 2px solid black;
+      width: 750px;
+      height: 500px;
+      background-color: rgba(235, 38, 12, 0.5);
+      margin-bottom: 75px;
+    }
+    h1 {
+      font: bold;
+      font-size: 40px;
+      font-family: arial;
+      color: black;
+      text-align: center;
+    }
+    p {
+      font-size: 25px;
+      font-family: arial;
+      color: black;
+      text-align: center;
+    }
+    button {
+      padding: 30px 55.5px;
+      border-radius: 10px;
+      border-color: rgb(145, 24, 24);
+      font-size: x-large;
+      font-weight: bold;
+      text-decoration: none;
+      background-color: rgba(163, 44, 1, 0.5);
+    }
+    button:hover {
+      background-color: rgba(163, 44, 1, 1.0);
+      cursor: pointer;
+    }
+  </style>
+
+  <body>
+    <div class="header">
+        <h1>- - - Security System Location - - -</h1>
+    </div>
+
+    <br><br><br><br><br><br><br>
+
+    <div class="container">
+        <div class="item">
+            <p>Display image of location</p>
+        </div>
+
+        <div id="back">
+            <a href="index.html" target="_self">
+                <button>Go Home</button>
+            </a>
+        </div>
+    </div>
+    
+
+    <div class="footer">
+        <p id="copy">Copyright &copy; 2025 Seth Butler</p>
+    </div>
+
+  </body>
+</html>
