@@ -9,8 +9,8 @@
 // ===========================
 // Enter your WiFi credentials
 // ===========================
-const char *ssid = "APhone";
-const char *password = "nonono123";
+const char *ssid = "Backup";
+const char *password = "nonono12345";
 
 void startCameraServer();
 void setupLedFlash();
