@@ -22,8 +22,8 @@
 
 rgb_lcd lcd; //lcd
 
-const char* ssid = "Backup";
-const char* password = "nonono12345";
+const char* ssid = "Backup";          //wifi
+const char* password = "nonono12345"; //wifi
 const int TRIG = 14;  //distance
 const int ECHO = 34;  //distance
 
@@ -80,12 +80,12 @@ void setup() {
   if (MDNS.begin("esp32")) {
     Serial.println("MDNS responder started");
   }
-  server.on("/", handleRoot);
-  server.on("/cameraWeb", handleCamera);
-  server.on("/locationWeb", handleLocation);
-  server.on("/keypadWeb", handleKeypad);
+  server.on("/", handleRoot);                 //html - webpage.h file 
+  server.on("/cameraWeb", handleCamera);      //html - camera.h file
+  server.on("/locationWeb", handleLocation);  //html - location.h file
+  server.on("/keypadWeb", handleKeypad);      //html - keypadWeb.h file
   server.on("/inline", [&server]() {
-    server.send(200, "text/plain", "this works as well");
+  server.send(200, "text/plain", "this works as well");
   });
   server.onNotFound(handleNotFound);
   server.begin();
@@ -118,10 +118,10 @@ void keyPad() { //keypad function
     lcd.clear();
 
     if (alarmStatus == 0) { 
-      lcd.print("Alarm Disabled-#"); 
+      lcd.print("Alarm Disabled #"); 
     }
     else { 
-      lcd.print("Alarm Active  -#"); 
+      lcd.print("Alarm Active   #"); 
     }
 
     delay(500);
@@ -306,15 +306,15 @@ void handleNotFound() { //if you cant connect the server will send this error 40
   server.send(404, "text/plain", message);
 }
 
-void handleCamera() {
+void handleCamera() { //loads the camera html file
   server.send(200, "text/html", CAMERA_HTML);
 }
 
-void handleKeypad() {
+void handleKeypad() { //loads the keypad html file
   server.send(200, "text/html", KEYPAD_HTML);
 }
 
-void handleLocation() {
+void handleLocation() { //loads the location html file
   server.send(200, "text/html", LOCATION_HTML);
 }
 
