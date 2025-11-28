@@ -1,4 +1,4 @@
-/*
+String homepage1 = R"=====( 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,21 +9,18 @@
 </head>
   <style>
     body {
-      background-image: url(background.jpg);
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-      background-size: 100% 100%;
+      background-color: lightgrey;
     }
     .header {
       display: flex;
       flex-direction: column;
-      background-color: color-mix(in oklab, black 25%, white);
+      background-color: white;
       align-items: center;
       border: 2px solid black; 
     }
     .footer {
       display: flex;
-      background-color: color-mix(in oklab, black 25%, white);
+      background-color: white;
       align-items: center;
       border: 2px solid black;
       height: 25px;
@@ -59,7 +56,7 @@
       align-items: center;
     }
     h1 {
-      font: bold;
+      font-weight: bold;
       font-size: 40px;
       font-family: arial;
       color: black;
@@ -97,40 +94,52 @@
       <div class="item">
         <h1>- Message -</h1>
         <br><br><br><br>
-        <p>Arm the alarm</p>
+        <p>
+)=====";
+String homepage2 = R"=====(
+        </p>
       </div>
 
       <div class="item">
         <h1>- Distance -</h1>
         <br>
-        <p>123.45Cm</p>
+        <p>
+)=====";
+String homepage3 = R"=====(        
+        </p>
         <br><br><br>
-        <p>Safe</p>
+        <p>
+)=====";
+String homepage4 = R"=====(
+        </p>
       </div>
 
       <div class="item">
         <div class="item1">
           <h1>- Keypad -</h1>
-          <a href="keypadWeb.h" target="_self">
+          <a href="/keypadWeb">
             <button>Enter Pin</button>
           </a>
         </div>
         <div class="item1">
             <h1>- KeyCard -</h1>
-            <p>User Name</p>
+            <p>
+)=====";
+String homepage5 = R"=====(
+            </p>
         </div>
       </div>
 
       <div class="item">
         <div class="item1">
           <h1>- Location -</h1>
-          <a href="location.h" target="_self">
+          <a href="/locationWeb">
             <button>View Location</button>
           </a>
         </div>
         <div class="item1">
             <h1>- Camera -</h1>
-            <a href="camera.h" target="_self">
+            <a href="/cameraWeb">
             <button>View Camera</button>
           </a>
         </div>
@@ -143,4 +152,4 @@
 
   </body>
 </html>
-*/
+)=====";
