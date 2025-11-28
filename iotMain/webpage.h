@@ -1,3 +1,4 @@
+/*
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,7 +33,7 @@
       bottom: 10px;
       padding: 10px;
     }
-    #copy {
+    .copy {
       font-size: 20px;
     }
     .container {
@@ -110,7 +111,7 @@
       <div class="item">
         <div class="item1">
           <h1>- Keypad -</h1>
-          <a href="keypad.h" target="_self">
+          <a href="keypadWeb.h" target="_self">
             <button>Enter Pin</button>
           </a>
         </div>
@@ -137,8 +138,9 @@
     </div>
 
     <div class="footer">
-        <p id="copy">Copyright &copy; 2025 Seth Butler</p>
+        <p class="copy">Copyright &copy; 2025 Seth Butler</p>
     </div>
 
   </body>
 </html>
+*/
