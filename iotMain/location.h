@@ -1,3 +1,4 @@
+/*
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,7 +33,7 @@
       bottom: 10px;
       padding: 10px;
     }
-    #copy {
+    .copy {
       font-size: 20px;
     }
     .container {
@@ -98,8 +99,9 @@
     
 
     <div class="footer">
-        <p id="copy">Copyright &copy; 2025 Seth Butler</p>
+        <p class="copy">Copyright &copy; 2025 Seth Butler</p>
     </div>
 
   </body>
 </html>
+*/

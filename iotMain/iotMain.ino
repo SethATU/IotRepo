@@ -1,9 +1,15 @@
-#include <Wire.h>     //lcd
-#include "rgb_lcd.h"  //lcd
-#include <Keypad.h>   //keypad
-#include <SPI.h>      //rfid
-#include <MFRC522.h>  //rfid
-//#include <webpage.h>  //webpage
+#include <Wire.h>           //lcd
+#include "rgb_lcd.h"        //lcd
+#include <Keypad.h>         //keypad
+#include <SPI.h>            //rfid
+#include <MFRC522.h>        //rfid
+//#include <webpage.h>        //webpage
+//#include <camera.h>         //webpage
+//#include <keypadWeb.h>      //webpage   
+//#include <location.h>       //webpage
+#include <WiFi.h>           //webserver
+#include <ESPmDNS.h>        //webserver
+#include <WebServer.h>      //webserver
 
 #define ROW 4     //keypad
 #define COLUMN 3  //keypad
@@ -16,12 +22,12 @@
 
 rgb_lcd lcd; //lcd
 
-
-unsigned long lastDistance = 0;         //distance
-
+const char* ssid = "Backup";
+const char* password = "nonono12345";
 const int TRIG = 14;  //distance
 const int ECHO = 34;  //distance
 
+unsigned long lastDistance = 0; //distance
 long dura;                      //distance
 float dist;                     //distance
 int distanceCheck = 20;         //distance
@@ -45,7 +51,9 @@ byte pin_rows[ROW] = {2, 0, 4, 16};             //keypad
 byte pin_column[COLUMN] = {17, 5, 18};          //keypad
 byte unlockCard[4] = {0x65, 0x74, 0x4D, 0x05};  //rfid - hex code for saved card
 
-Keypad keypad = Keypad( makeKeymap(keys), pin_rows, pin_column, ROW, COLUMN);  //keypad
+Keypad keypad = Keypad(makeKeymap(keys), pin_rows, pin_column, ROW, COLUMN);  //keypad
+
+WebServer server(80); //webserver
 
 void setup() {
   Serial.begin(115200);
@@ -53,6 +61,32 @@ void setup() {
   Wire.begin(19, 23); //lcd
   lcd.begin(16, 2);   //lcd
   SPI.begin(SCK_RFID, MISO_RFID, MOSI_RFID, SS_RFID); //rfid
+
+  WiFi.mode(WIFI_STA);        //webserver
+  WiFi.begin(ssid, password); //webserver
+  Serial.println("");         //webserver
+
+  //all below is related to webserver
+  //tells you if its connected or not and shows the IP address
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.print("Connected to ");
+  Serial.println(ssid);
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+  if (MDNS.begin("esp32")) {
+    Serial.println("MDNS responder started");
+  }
+  server.on("/", handleRoot);
+  server.on("/inline", [&server]() {
+    server.send(200, "text/plain", "this works as well");
+  });
+  server.onNotFound(handleNotFound);
+  server.begin();
+  Serial.println("HTTP server started");
 
   pinMode(BUZZ, OUTPUT);  //buzzer 
   pinMode(TRIG, OUTPUT);  //distance
@@ -68,6 +102,8 @@ void setup() {
 }
 
 void loop() {
+  server.handleClient();
+  delay(2);
   keyPad();
   distance();
 }
@@ -210,7 +246,7 @@ void distance() { //distance function
   }
 }
 
-void rfidFunction() {
+void rfidFunction() { //rfid card sacnner function
   lcd.clear();
   lcd.print("Scan Card.");
   lcd.setCursor(0, 1);
@@ -237,4 +273,23 @@ void rfidFunction() {
   prompt = true;
 
   return;
+}
+
+void handleRoot() { //function to send information to the websight 
+  server.send(200, "text/plain", "hello from esp32!");
+}
+
+void handleNotFound() { //if you cant connect the server will send this error 404 message 
+  String message = "File Not Found\n\n";
+  message += "URI: ";
+  message += server.uri();
+  message += "\nMethod: ";
+  message += (server.method() == HTTP_GET) ? "GET" : "POST";
+  message += "\nArguments: ";
+  message += server.args();
+  message += "\n";
+  for (uint8_t i = 0; i < server.args(); i++) {
+    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+  }
+  server.send(404, "text/plain", message);
 }
