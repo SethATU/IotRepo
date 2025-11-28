@@ -1,4 +1,4 @@
-/*
+const char CAMERA_HTML[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,21 +9,18 @@
 </head>
   <style>
     body {
-      background-image: url(background.jpg);
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-      background-size: 100% 100%;
+      background-color: lightgrey;
     }
     .header {
       display: flex;
       flex-direction: column;
-      background-color: color-mix(in oklab, black 25%, white);
+      background-color: white;
       align-items: center;
       border: 2px solid black; 
     }
     .footer {
       display: flex;
-      background-color: color-mix(in oklab, black 25%, white);
+      background-color: white;
       align-items: center;
       border: 2px solid black;
       height: 25px;
@@ -51,7 +48,7 @@
       margin-bottom: 75px;
     }
     h1 {
-      font: bold;
+      font-weight: bold;
       font-size: 40px;
       font-family: arial;
       color: black;
@@ -91,7 +88,7 @@
         </div>
 
         <div id="back">
-            <a href="webpage.h" target="_self">
+            <a href="/">
                 <button>Go Home</button>
             </a>
         </div>
@@ -104,4 +101,4 @@
 
   </body>
 </html>
-*/
+)rawliteral";

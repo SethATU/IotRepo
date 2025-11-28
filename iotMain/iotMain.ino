@@ -3,10 +3,10 @@
 #include <Keypad.h>         //keypad
 #include <SPI.h>            //rfid
 #include <MFRC522.h>        //rfid
-//#include <webpage.h>        //webpage
-//#include <camera.h>         //webpage
-//#include <keypadWeb.h>      //webpage   
-//#include <location.h>       //webpage
+#include <webpage.h>        //webpage
+#include <camera.h>         //webpage
+#include <keypadWeb.h>      //webpage   
+#include <location.h>       //webpage
 #include <WiFi.h>           //webserver
 #include <ESPmDNS.h>        //webserver
 #include <WebServer.h>      //webserver
@@ -81,6 +81,9 @@ void setup() {
     Serial.println("MDNS responder started");
   }
   server.on("/", handleRoot);
+  server.on("/cameraWeb", handleCamera);
+  server.on("/locationWeb", handleLocation);
+  server.on("/keypadWeb", handleKeypad);
   server.on("/inline", [&server]() {
     server.send(200, "text/plain", "this works as well");
   });
@@ -115,10 +118,10 @@ void keyPad() { //keypad function
     lcd.clear();
 
     if (alarmStatus == 0) { 
-      lcd.print("Alarm Disabled//#"); 
+      lcd.print("Alarm Disabled-#"); 
     }
     else { 
-      lcd.print("Alarm Active  //#"); 
+      lcd.print("Alarm Active  -#"); 
     }
 
     delay(500);
@@ -276,7 +279,16 @@ void rfidFunction() { //rfid card sacnner function
 }
 
 void handleRoot() { //function to send information to the websight 
-  server.send(200, "text/plain", "hello from esp32!");
+  String serverMessage = homepage1 
+                       + serverMessageBox() 
+                       + homepage2 
+                       + distanceToString() 
+                       + homepage3 
+                       + distanceMessageBox() 
+                       + homepage4 
+                       + rfidMessageBox() 
+                       + homepage5;
+  server.send(200, "text/html", serverMessage);
 }
 
 void handleNotFound() { //if you cant connect the server will send this error 404 message 
@@ -293,3 +305,35 @@ void handleNotFound() { //if you cant connect the server will send this error 40
   }
   server.send(404, "text/plain", message);
 }
+
+void handleCamera() {
+  server.send(200, "text/html", CAMERA_HTML);
+}
+
+void handleKeypad() {
+  server.send(200, "text/html", KEYPAD_HTML);
+}
+
+void handleLocation() {
+  server.send(200, "text/html", LOCATION_HTML);
+}
+
+String distanceToString() { //converts the distance reading to a string so it can be displayed on the websight
+  digitalWrite(TRIG, LOW);
+  delayMicroseconds(5);
+  digitalWrite(TRIG, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG, LOW);
+
+  dura = pulseIn(ECHO, HIGH, 20000); //timeout after 20ms
+  dist = (dura * 0.0343) / 2; //convert to cm
+
+  if (dura == 0) { return "No Reading"; }
+  else { return String(dist) + " cm"; }
+}
+
+String serverMessageBox() { return "The server is up and running"; }
+
+String distanceMessageBox() { return "No Movement / Movments"; }
+
+String rfidMessageBox() { return "Seth's Card"; }
