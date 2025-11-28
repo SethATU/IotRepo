@@ -122,7 +122,7 @@ String homepage4 = R"=====(
           </a>
         </div>
         <div class="item1">
-            <h1>- KeyCard -</h1>
+            <h1>- Key -</h1>
             <p>
 )=====";
 String homepage5 = R"=====(

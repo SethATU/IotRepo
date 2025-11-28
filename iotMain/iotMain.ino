@@ -26,7 +26,6 @@ const char* ssid = "Backup";          //wifi
 const char* password = "nonono12345"; //wifi
 const int TRIG = 14;  //distance
 const int ECHO = 34;  //distance
-
 unsigned long lastDistance = 0; //distance
 long dura;                      //distance
 float dist;                     //distance
@@ -44,12 +43,15 @@ char keys[ROW][COLUMN] =  {     //keypad
   {'*', '0', '#'}
 };
 int alarmStatus = 0;  //alarm - 0-off / 1-on
+int card = 0;         //card scanned - 0-Not scanned / 1-Matches / 2-No Match
+int unlock = 0;       //card scanned - 0-Not scanned / 1-Card / 2-Fob 
 
 MFRC522 rfid(SS_RFID, RST_RFID);  //rfid
 
 byte pin_rows[ROW] = {2, 0, 4, 16};             //keypad
 byte pin_column[COLUMN] = {17, 5, 18};          //keypad
 byte unlockCard[4] = {0x65, 0x74, 0x4D, 0x05};  //rfid - hex code for saved card
+byte unlockFob[4] = {0x26, 0xF4, 0xAF, 0x01};   //rfid - hex code for saved key fob
 
 Keypad keypad = Keypad(makeKeymap(keys), pin_rows, pin_column, ROW, COLUMN);  //keypad
 
@@ -257,18 +259,32 @@ void rfidFunction() { //rfid card sacnner function
   while (!rfid.PICC_IsNewCardPresent()) { delay(10); } 
   while (!rfid.PICC_ReadCardSerial()) { delay(10); }
 
-  if (memcmp(rfid.uid.uidByte, unlockCard, 4) == 0) {
-    lcd.print("Card Matches");
+  bool isCard = (memcmp(rfid.uid.uidByte, unlockCard, 4) == 0);
+  bool isFob = (memcmp(rfid.uid.uidByte, unlockFob, 4) == 0);
+    
+  if (isCard || isFob) {
+    lcd.print("Key Matches");
+    card = 1;
     if (alarmStatus == 1) {
       alarmStatus = 0;
     }
     else {
       alarmStatus = 1;
     } 
+
+    if (isCard) {
+      unlock = 1;
+    }
+    else { 
+      unlock = 2;
+    }
   }
   else {
-    lcd.print("Crad does not match");
+    lcd.print("No Key Match");
+    card = 2;
+    unlock = 3;
   }
+
   
   delay(2500);
   lcd.clear();
@@ -318,6 +334,19 @@ void handleLocation() { //loads the location html file
   server.send(200, "text/html", LOCATION_HTML);
 }
 
+float distanceRead() {
+  digitalWrite(TRIG, LOW);
+  delayMicroseconds(5);
+  digitalWrite(TRIG, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG, LOW);
+
+  dura = pulseIn(ECHO, HIGH, 20000); //timeout after 20ms
+  dist = (dura * 0.0343) / 2; //convert to cm
+
+  return dist;
+}
+
 String distanceToString() { //converts the distance reading to a string so it can be displayed on the websight
   digitalWrite(TRIG, LOW);
   delayMicroseconds(5);
@@ -332,8 +361,47 @@ String distanceToString() { //converts the distance reading to a string so it ca
   else { return String(dist) + " cm"; }
 }
 
-String serverMessageBox() { return "The server is up and running"; }
+String serverMessageBox() { 
+  String serMes = "Error";
 
-String distanceMessageBox() { return "No Movement / Movments"; }
+  if (alarmStatus == 1) {
+    serMes = "Alamra Status<br>-ACTIVE-";
+  }
+  else {
+    serMes = "Alamra Status<br>-DISABLED-";
+  }
 
-String rfidMessageBox() { return "Seth's Card"; }
+  return serMes; 
+}
+
+String distanceMessageBox() { 
+  int d = distanceRead();
+  String disMes = "Error";
+
+  if (d > 20) {
+    disMes = "NO MOVEMENT";
+  }
+  else {
+    disMes = "MOVEMENT\nDETECTED";
+  }
+
+  return disMes; 
+}
+
+String rfidMessageBox() { 
+  String cardMes = "Error";  
+
+  switch (card) {
+    case 0: cardMes = "NO SCAN"; break;
+    case 1:
+      switch (unlock) {
+        case 1: cardMes = "KEY CARD"; break;
+        case 2: cardMes = "KEY FOB"; break;
+        default: cardMes = "Switch Error";
+      } break;
+    case 2: cardMes = "NO MATCH"; break;
+    default: cardMes = "Switch Error";
+  }
+  
+  return cardMes; 
+}
