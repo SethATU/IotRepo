@@ -24,12 +24,18 @@ rgb_lcd lcd; //lcd
 
 const char* ssid = "Backup";          //wifi
 const char* password = "nonono12345"; //wifi
-const int TRIG = 14;  //distance
-const int ECHO = 34;  //distance
+
+const int TRIG = 14;            //distance
+const int ECHO = 34;            //distance
 unsigned long lastDistance = 0; //distance
 long dura;                      //distance
 float dist;                     //distance
 int distanceCheck = 20;         //distance
+unsigned long webTimer = 0;     //keypad web
+int webState = 0;               //keypad web
+int webIndex = 0;               //keypad web
+int webPass[4];                 //keypad web
+int webPassWrong = 0;           //keypad web
 int passCode[4] = {1, 2, 3, 4}; //keypad
 int passCodeEntered[4];         //keypad
 int passCodeWrong = 0;          //keypad
@@ -55,6 +61,8 @@ byte unlockFob[4] = {0x26, 0xF4, 0xAF, 0x01};   //rfid - hex code for saved key 
 
 Keypad keypad = Keypad(makeKeymap(keys), pin_rows, pin_column, ROW, COLUMN);  //keypad
 
+String webScreen = "____";  //keypad web
+
 WebServer server(80); //webserver
 
 void setup() {
@@ -70,10 +78,10 @@ void setup() {
 
   //all below is related to webserver
   //tells you if its connected or not and shows the IP address
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED) { //waiting for the wifi to connect
     delay(500);
     Serial.print(".");
-  }
+  } //when the wifi is connected it prints the name of the wifi host and the IPadress to the serial monitor
   Serial.println("");
   Serial.print("Connected to ");
   Serial.println(ssid);
@@ -86,6 +94,15 @@ void setup() {
   server.on("/cameraWeb", handleCamera);      //html - camera.h file
   server.on("/locationWeb", handleLocation);  //html - location.h file
   server.on("/keypadWeb", handleKeypad);      //html - keypadWeb.h file
+  server.on("/pressKey", []() {               //html - keypadWeb.h - collects the inputs from the keypad and also pastes messages to the given window 
+    if (!server.hasArg("key")) {
+      server.send(400, "text/plain", "Error");  
+      return;
+    }
+    char key = server.arg("key")[0];
+    keyPadWeb(key);
+    server.send(200, "text/plain", webScreen);
+  });
   server.on("/inline", [&server]() {
   server.send(200, "text/plain", "this works as well");
   });
@@ -138,7 +155,7 @@ void keyPad() { //keypad function
       passCodeEntered[keyIndex] = key - '0';
       keyIndex++;
     }
-    if (key == '#') {
+    if (key == '#') { //#key starts the key card scanner function
       delay(500);
       rfidFunction();
       return;
@@ -163,11 +180,11 @@ void checkCode() {  //checks the pass code is correct
     }
   }
 
-  if (passCodeWrong > 0 && alarmStatus == 1) {
+  if (passCodeWrong > 0 && alarmStatus == 1) {  //loose an attempt if you put in the wrong passcode
     atempt--;
   }
 
-  if (passCodeWrong == 0) {
+  if (passCodeWrong == 0) { //if you put in the correct passcode it prints that you did it correct and resets atempts
     delay(1000);
     lcd.clear();
     lcd.print("Correct.");
@@ -180,7 +197,7 @@ void checkCode() {  //checks the pass code is correct
       alarmStatus = 1;
     } 
   }
-  else if (passCodeWrong > 0 && atempt > 0 && alarmStatus == 0) {
+  else if (passCodeWrong > 0 && atempt > 0 && alarmStatus == 0) { //if you have got more thank 0 attempts and the alarm is disarmed but you put in the wrong code, you get to try again
     delay(1000);
     lcd.clear();
     lcd.print("Incorrect.");
@@ -189,7 +206,7 @@ void checkCode() {  //checks the pass code is correct
     delay(2500);
     alarmStatus = 0;
   }
-  else if (passCodeWrong > 0 && atempt == 0) {
+  else if (passCodeWrong > 0 && atempt == 0) {  //if you put in the wrong code and have no more attempts the alarm will sound 
     delay(1000);
     lcd.clear();
     lcd.print("Incorrect.");
@@ -197,8 +214,7 @@ void checkCode() {  //checks the pass code is correct
     lcd.print("Sounding Alarm!");   
     buzzer();
   }
-  else
-  {
+  else { //if the alarm is armed but you have more than 0 attempts you get a warning of how many attemptys you have left 
     delay(1000);
     lcd.clear();
     lcd.print("Incorrect.");
@@ -209,7 +225,7 @@ void checkCode() {  //checks the pass code is correct
   }
 }
 
-void buzzer() { //buzzer function
+void buzzer() { //buzzer function - alarm rings for 20 seconds 
   for(int i = 0; i < 40; i++) {
     digitalWrite(BUZZ, HIGH);
     delay(250);
@@ -224,7 +240,7 @@ void buzzer() { //buzzer function
 }
 
 void distance() { //distance function
-  unsigned long currentMillis = millis(); 
+  unsigned long currentMillis = millis(); //allows the function to interup any outher functions going on 
 
   if (currentMillis - lastDistance >= 200) {
     lastDistance = currentMillis;
@@ -240,7 +256,7 @@ void distance() { //distance function
 
     if (dura == 0) return;
     if (dist > 0 && dist < distanceCheck) {
-      if (alarmStatus == 1) {
+      if (alarmStatus == 1) { //if the alarm is armed and the sensor seems movment under 20cm away it will sound the alarm 
         lcd.clear();
         lcd.print("Movement!");
         lcd.setCursor(0, 1);
@@ -259,10 +275,11 @@ void rfidFunction() { //rfid card sacnner function
   while (!rfid.PICC_IsNewCardPresent()) { delay(10); } 
   while (!rfid.PICC_ReadCardSerial()) { delay(10); }
 
+  //checks if the code matches the fob or key card hex code and sets it to true or false 
   bool isCard = (memcmp(rfid.uid.uidByte, unlockCard, 4) == 0);
   bool isFob = (memcmp(rfid.uid.uidByte, unlockFob, 4) == 0);
     
-  if (isCard || isFob) {
+  if (isCard || isFob) {  //sends the update to the webserver and also the lcd screen 
     lcd.print("Key Matches");
     card = 1;
     if (alarmStatus == 1) {
@@ -327,6 +344,8 @@ void handleCamera() { //loads the camera html file
 }
 
 void handleKeypad() { //loads the keypad html file
+  //webScreen = "____";
+  //keyIndex = 0;
   server.send(200, "text/html", KEYPAD_HTML);
 }
 
@@ -334,7 +353,7 @@ void handleLocation() { //loads the location html file
   server.send(200, "text/html", LOCATION_HTML);
 }
 
-float distanceRead() {
+float distanceRead() {  //same function as above and bellow but allows the belwo function distancemessagebox() to let the webserver know if its safe or not 
   digitalWrite(TRIG, LOW);
   delayMicroseconds(5);
   digitalWrite(TRIG, HIGH);
@@ -361,7 +380,7 @@ String distanceToString() { //converts the distance reading to a string so it ca
   else { return String(dist) + " cm"; }
 }
 
-String serverMessageBox() { 
+String serverMessageBox() { //displays to the webserver what the state of the alarm is 
   String serMes = "Error";
 
   if (alarmStatus == 1) {
@@ -374,7 +393,7 @@ String serverMessageBox() {
   return serMes; 
 }
 
-String distanceMessageBox() { 
+String distanceMessageBox() {  //displays to the webserver using above function weather or not movment has been detected 
   int d = distanceRead();
   String disMes = "Error";
 
@@ -388,7 +407,7 @@ String distanceMessageBox() {
   return disMes; 
 }
 
-String rfidMessageBox() { 
+String rfidMessageBox() { //after a card has been scaned this function tells the webserver if it was the saved key card or a key fob, and if it dosent know the card it says no match 
   String cardMes = "Error";  
 
   switch (card) {
@@ -405,3 +424,121 @@ String rfidMessageBox() {
   
   return cardMes; 
 }
+
+/*
+String webDisplay() {
+  return webScreen;
+}
+*/
+
+//this function gets information from the javascript in the keypadWeb.h files keypad buttons to act just like the phisical keypad 
+//this function can also do the check code function to check what has been input is correct to avoid issues that would keep freezing the webserver and lcd display 
+//only on the webserver keypad, you have to press the * key to progress to the next state as without this implamentation, the last number input would not display on the webserver
+void keyPadWeb(char key) {  
+  if (webState == 0 && key >= '0' && key <= '9') {
+    if (webIndex < 4) {
+      webPass[webIndex] = key - '0';
+      webIndex++;
+    }
+
+    lcd.clear();
+
+    //sends to the lcd display whats being input on the webserver 
+    webScreen = "";
+    for (int i = 0; i < webIndex; i++) {
+      webScreen += String(webPass[i]);
+    }
+    for (int j = webIndex; j < 4; j++) {
+      webScreen += "_";
+    }
+
+    lcd.print("Webserver");
+    lcd.setCursor(0, 1);
+    lcd.print(webScreen);
+
+    if (webIndex == 4) {
+      webState = 1;
+    }
+  }
+  else if (webState == 1 && key == '*') {
+    webPassWrong = 0;
+    for (int i = 0; i < 4; i++) {
+      if (webPass[i] != passCode[i]) {
+        webPassWrong++;
+      }
+    }
+    
+    lcd.clear();
+
+    if (webPassWrong == 0) {
+      webScreen = "Correct";
+      lcd.print("Webserver");
+      lcd.setCursor(0, 1);
+      lcd.print(webScreen);
+      atempt = 3;
+      if (alarmStatus == 1) {
+        alarmStatus = 0;
+      }
+      else {
+        alarmStatus = 1;
+      }
+    }
+    else {
+      webScreen = "Incorrect";
+      atempt--;
+      if(alarmStatus == 0) {
+        lcd.print("Webserver");
+        lcd.setCursor(0, 1);
+        lcd.print(webScreen);
+      }
+      else if (alarmStatus == 1 && atempt > 0) {
+        lcd.print("Webserver");
+        lcd.setCursor(0, 1);
+        lcd.print(webScreen);
+        webScreen = String(atempt) + " Attempts Left";
+        if (key == '*') {
+          lcd.clear();
+          lcd.print("Incorrect");
+          lcd.setCursor(0, 1);
+          lcd.print(webScreen);
+        }
+      }
+      else if (alarmStatus == 1 && atempt == 0) {
+        lcd.print("Webserver");
+        lcd.setCursor(0, 1);
+        lcd.print(webScreen);
+        webScreen = "Sounding Alarm";
+        if (key == '*') {
+          lcd.clear();
+          lcd.print("Incorrect");
+          lcd.setCursor(0, 1);
+          lcd.print(webScreen);
+          buzzer();
+        }
+      }
+      else if (alarmStatus = 0){
+        lcd.print("Webserver");
+        lcd.setCursor(0, 1);
+        lcd.print(webScreen);
+        webScreen = "Try Again";
+        if (key == '*') {
+          lcd.clear();
+          lcd.print("Incorrect");
+          lcd.setCursor(0, 1);
+          lcd.print(webScreen);
+        }
+      }
+    }
+    webState = 2;
+  }
+  else if (webState == 2 && key == '*') {
+
+    webIndex = 0;
+    webState = 0;
+    webScreen = "____";
+    prompt = true;
+  }
+  else if (key == '#') {
+    rfidFunction();
+  }
+}    

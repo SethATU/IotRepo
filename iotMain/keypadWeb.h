@@ -92,28 +92,28 @@ const char KEYPAD_HTML[] PROGMEM = R"rawliteral(
       <div class="item">
         <table>
           <tr>
-            <th><button>1</button></th>
-            <th><button>2</button></th>
-            <th><button>3</button></th>
+            <th><button onclick="sendkey('1')">1</button></th>
+            <th><button onclick="sendkey('2')">2</button></th>
+            <th><button onclick="sendkey('3')">3</button></th>
           </tr>
           <tr>
-            <th><button>4</button></th>
-            <th><button>5</button></th>
-            <th><button>6</button></th>
+            <th><button onclick="sendkey('4')">4</button></th>
+            <th><button onclick="sendkey('5')">5</button></th>
+            <th><button onclick="sendkey('6')">6</button></th>
           </tr>
           <tr>
-            <th><button>7</button></th>
-            <th><button>8</button></th>
-            <th><button>9</button></th>
+            <th><button onclick="sendkey('7')">7</button></th>
+            <th><button onclick="sendkey('8')">8</button></th>
+            <th><button onclick="sendkey('9')">9</button></th>
           </tr>
           <tr>
-            <th><button>*</button></th>
-            <th><button>0</button></th>
-            <th><button>#</button></th>
+            <th><button onclick="sendkey('%2A')">*</button></th>
+            <th><button onclick="sendkey('0')">0</button></th>
+            <th><button onclick="sendkey('%23')">#</button></th>
           </tr>
         </table>
         <div class="item2">
-          <p>1 2 3 4</p>
+          <p id="webDisplay">____</p>
         </div>
       </div>
 
@@ -128,6 +128,13 @@ const char KEYPAD_HTML[] PROGMEM = R"rawliteral(
       <p class="copy">Copyright &copy; 2025 Seth Butler</p>
     </div>
 
+    <script>
+      function sendkey(key) {
+        fetch('/pressKey?key=' + key)
+          .then(response => response.text())
+          .then(data => {document.getElementById('webDisplay').innerText = data;});
+      }
+    </script>
   </body>
 </html>
 )rawliteral";
