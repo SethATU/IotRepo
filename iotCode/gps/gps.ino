@@ -15,11 +15,15 @@
 // and help support open source hardware & software! -ada
 
 #include <Adafruit_GPS.h>
+#include <HardwareSerial.h>
 
 // what's the name of the hardware serial port?
 #define GPSSerial Serial1
 
 // Connect to the GPS on the hardware port
+
+#define RXPin 16 
+#define TXPin 17
 Adafruit_GPS GPS(&GPSSerial);
 
 // Set GPSECHO to 'false' to turn off echoing the GPS data to the Serial console
