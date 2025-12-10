@@ -84,7 +84,7 @@ const char CAMERA_HTML[] PROGMEM = R"rawliteral(
 
     <div class="container">
         <div class="item">
-            <p>Display live camera feed</p>
+            <iframe src="http://10.231.187.212/stream" title="Camera Feed"></iframe>
         </div>
 
         <div id="back">
