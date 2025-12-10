@@ -12,6 +12,9 @@
 const char *ssid = "Backup";
 const char *password = "nonono12345";
 
+//const char *ssid = "TP-Link_9484";
+//const char *password = "78424579";
+
 void startCameraServer();
 void setupLedFlash();
 
