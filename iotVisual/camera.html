@@ -8,21 +8,18 @@
 </head>
   <style>
     body {
-      background-image: url(background.jpg);
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-      background-size: 100% 100%;
+      background-color: lightgrey;
     }
     .header {
       display: flex;
       flex-direction: column;
-      background-color: color-mix(in oklab, black 25%, white);
+      background-color: white;
       align-items: center;
       border: 2px solid black; 
     }
     .footer {
       display: flex;
-      background-color: color-mix(in oklab, black 25%, white);
+      background-color: white;
       align-items: center;
       border: 2px solid black;
       height: 25px;
@@ -32,7 +29,7 @@
       bottom: 10px;
       padding: 10px;
     }
-    #copy {
+    .copy {
       font-size: 20px;
     }
     .container {
@@ -50,7 +47,7 @@
       margin-bottom: 75px;
     }
     h1 {
-      font: bold;
+      font-weight: bold;
       font-size: 40px;
       font-family: arial;
       color: black;
@@ -75,6 +72,15 @@
       background-color: rgba(163, 44, 1, 1.0);
       cursor: pointer;
     }
+    .cam {
+      padding-top: 128px;
+      padding-left: 214px;
+      padding-bottom: 129px;
+      padding-right: 213px;
+      width: 320px;
+      height: 240px;
+      transform: scaleY(-1);
+    }
   </style>
 
   <body>
@@ -86,11 +92,11 @@
 
     <div class="container">
         <div class="item">
-            <p>Display live camera feed</p>
+            <iframe class="cam" src="http://10.231.187.212:81/stream" title="Camera Feed"></iframe>
         </div>
 
         <div id="back">
-            <a href="index.html" target="_self">
+            <a href="/">
                 <button>Go Home</button>
             </a>
         </div>
@@ -98,7 +104,7 @@
     
 
     <div class="footer">
-        <p id="copy">Copyright &copy; 2025 Seth Butler</p>
+        <p class="copy">Copyright &copy; 2025 Seth Butler</p>
     </div>
 
   </body>
