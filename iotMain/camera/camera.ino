@@ -125,7 +125,7 @@ void setup() {
  
    Serial.print("Camera Ready! Use 'http://");
    Serial.print(WiFi.localIP());
-   Serial.println("/stream' to connect");
+   Serial.println("' to connect");
  
   WiFi.softAP(ssid, password);
   startCameraServer1(); 

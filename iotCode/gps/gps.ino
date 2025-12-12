@@ -18,13 +18,11 @@
 #include <HardwareSerial.h>
 
 // what's the name of the hardware serial port?
-#define GPSSerial Serial1
 
 // Connect to the GPS on the hardware port
-
-#define RXPin 16 
-#define TXPin 17
+#define GPSSerial Serial2
 Adafruit_GPS GPS(&GPSSerial);
+#define GPSECHO false
 
 // Set GPSECHO to 'false' to turn off echoing the GPS data to the Serial console
 // Set to 'true' if you want to debug and listen to the raw GPS sentences
@@ -43,6 +41,7 @@ void setup()
   Serial.println("Adafruit GPS library basic parsing test!");
 
   // 9600 NMEA is the default baud rate for Adafruit MTK GPS's- some use 4800
+  Serial2.begin(9600, SERIAL_8N1, 16, 17);
   GPS.begin(9600);
   // uncomment this line to turn on RMC (recommended minimum) and GGA (fix data) including altitude
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);

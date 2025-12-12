@@ -73,6 +73,15 @@ const char CAMERA_HTML[] PROGMEM = R"rawliteral(
       background-color: rgba(163, 44, 1, 1.0);
       cursor: pointer;
     }
+    .cam {
+      padding-top: 128px;
+      padding-left: 214px;
+      padding-bottom: 129px;
+      padding-right: 213px;
+      width: 320px;
+      height: 240px;
+      transform: scaleY(-1);
+    }
   </style>
 
   <body>
@@ -84,7 +93,7 @@ const char CAMERA_HTML[] PROGMEM = R"rawliteral(
 
     <div class="container">
         <div class="item">
-            <iframe src="http://10.231.187.212/stream" title="Camera Feed"></iframe>
+            <iframe class="cam" src="http://10.231.187.212:81/stream" title="Camera Feed"></iframe>
         </div>
 
         <div id="back">
