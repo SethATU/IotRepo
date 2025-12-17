@@ -10,6 +10,12 @@
 #include <WiFi.h>           //webserver
 #include <ESPmDNS.h>        //webserver
 #include <WebServer.h>      //webserver
+#include <Adafruit_GPS.h>   //gps
+#include <HardwareSerial.h> //gps
+
+// #define GPSSerial Serial2     //gps
+// Adafruit_GPS GPS(&GPSSerial); //gps
+// #define GPSECHO false         //gps
 
 #define ROW 4     //keypad
 #define COLUMN 3  //keypad
@@ -25,6 +31,7 @@ rgb_lcd lcd; //lcd
 const char* ssid = "Backup";          //wifi
 const char* password = "nonono12345"; //wifi
 
+//bool location = false;          //gps 
 const int TRIG = 14;            //distance
 const int ECHO = 34;            //distance
 unsigned long lastDistance = 0; //distance
@@ -75,6 +82,18 @@ void setup() {
   WiFi.mode(WIFI_STA);        //webserver
   WiFi.begin(ssid, password); //webserver
   Serial.println("");         //webserver
+
+
+
+  // Serial2.begin(9600, SERIAL_8N1, 16, 17);  //gps
+  // GPS.begin(9600);  //gps
+
+  // GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA); //gps
+  // GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);    //gps
+  // GPS.sendCommand(PGCMD_ANTENNA);               //gps
+  // delay(1000);
+  // GPSSerial.println(PMTK_Q_RELEASE);            //gps
+
 
   //all below is related to webserver
   //tells you if its connected or not and shows the IP address
@@ -128,6 +147,7 @@ void loop() {
   delay(2);
   keyPad();
   distance();
+  //gps();
 }
 
 void keyPad() { //keypad function
@@ -541,4 +561,34 @@ void keyPadWeb(char key) {
   else if (key == '#') {
     rfidFunction();
   }
-}    
+}
+
+/*
+void gps() {
+  // char c = GPS.read();
+  // if (GPSECHO)
+  //   if (c) Serial.print(c);
+  // if (GPS.newNMEAreceived()) {
+  //       Serial.print(GPS.lastNMEA()); 
+  //   if (!GPS.parse(GPS.lastNMEA())) 
+  //     return; 
+  // }
+
+  if(location) {
+    lcd.clear();
+    Serial.print("Fix: "); Serial.print((int)GPS.fix);
+    Serial.print(" quality: "); Serial.println((int)GPS.fixquality);
+    if (GPS.fix) {
+      Serial.print("Location: ");
+      Serial.print(GPS.latitude, 4); Serial.print(GPS.lat);
+      Serial.print(", ");
+      Serial.print(GPS.longitude, 4); Serial.println(GPS.lon);
+      
+      lcd.print(GPS.latitude, 4); Serial.print(GPS.lat);
+      lcd.setCursor(0, 1);
+      lcd.print(GPS.longitude, 4); Serial.println(GPS.lon);
+      delay(5000);
+    }
+  }
+}
+*/
