@@ -3,10 +3,10 @@
 #include <Keypad.h>         //keypad
 #include <SPI.h>            //rfid
 #include <MFRC522.h>        //rfid
-#include <webpage.h>        //webpage
-#include <camera.h>         //webpage
-#include <keypadWeb.h>      //webpage   
-#include <location.h>       //webpage
+#include <webPage.h>        //webpage
+//#include <camera.h>         //webpage
+//#include <keypadWeb.h>      //webpage   
+//#include <location.h>       //webpage
 #include <WiFi.h>           //webserver
 #include <ESPmDNS.h>        //webserver
 #include <WebServer.h>      //webserver
@@ -108,9 +108,9 @@ void setup() {
     Serial.println("MDNS responder started");
   }
   server.on("/", handleRoot);                 //html - webpage.h file 
-  server.on("/cameraWeb", handleCamera);      //html - camera.h file
-  server.on("/locationWeb", handleLocation);  //html - location.h file
-  server.on("/keypadWeb", handleKeypad);      //html - keypadWeb.h file
+  // server.on("/cameraWeb", handleCamera);      //html - camera.h file
+  // server.on("/locationWeb", handleLocation);  //html - location.h file
+  // server.on("/keypadWeb", handleKeypad);      //html - keypadWeb.h file
   server.on("/pressKey", []() {               //html - keypadWeb.h - collects the inputs from the keypad and also pastes messages to the given window 
     if (!server.hasArg("key")) {
       server.send(400, "text/plain", "Error");  
@@ -357,19 +357,19 @@ void handleNotFound() { //if you cant connect the server will send this error 40
   server.send(404, "text/plain", message);
 }
 
-void handleCamera() { //loads the camera html file
-  server.send(200, "text/html", CAMERA_HTML);
-}
+// void handleCamera() { //loads the camera html file
+//   server.send(200, "text/html", CAMERA_HTML);
+// }
 
-void handleKeypad() { //loads the keypad html file
-  //webScreen = "____";
-  //keyIndex = 0;
-  server.send(200, "text/html", KEYPAD_HTML);
-}
+// void handleKeypad() { //loads the keypad html file
+//   //webScreen = "____";
+//   //keyIndex = 0;
+//   server.send(200, "text/html", KEYPAD_HTML);
+// }
 
-void handleLocation() { //loads the location html file
-  server.send(200, "text/html", LOCATION_HTML);
-}
+// void handleLocation() { //loads the location html file
+//   server.send(200, "text/html", LOCATION_HTML);
+// }
 
 float distanceRead() {  //same function as above and bellow but allows the belwo function distancemessagebox() to let the webserver know if its safe or not 
   digitalWrite(TRIG, LOW);
