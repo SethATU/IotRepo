@@ -31,7 +31,12 @@ rgb_lcd lcd; //lcd
 const char* ssid = "Backup";          //wifi
 const char* password = "nonono12345"; //wifi
 
-uint32_t timer = millis();
+uint32_t timer = millis();      //gps
+float latt;                    //gps
+char lattChar;
+float lonn;                    //gps
+char lonnChar;
+int fixs;                       //gps
 //bool location = false;          //gps 
 const int TRIG = 14;            //distance
 const int ECHO = 34;            //distance
@@ -570,14 +575,29 @@ void gps() {
   }
 
   if (millis() - timer > 2000) {
-    timer = millis(); // reset the timer
+    timer = millis();
+
+    if (GPS.fix) { fixs = 1; }
+    else { fixs = 0; }
+
+    if(GPS.fix) {
+        Serial.print("Fixed");
+      } 
+      else {
+        Serial.print("No FIx");
+      }
+    
     Serial.print("Fix: "); Serial.print((int)GPS.fix);
-    Serial.print(" quality: "); Serial.println((int)GPS.fixquality);
+    Serial.println(" ...");
+
     if (GPS.fix) {
-      Serial.print("Location: ");
-      Serial.print(GPS.latitude, 4); Serial.print(GPS.lat);
-      Serial.print(", ");
-      Serial.print(GPS.longitude, 4); Serial.println(GPS.lon);
+      latt = GPS.latitude;
+      lattChar = GPS.lat;    
+      lonn = GPS.longitude;
+      lonnChar = GPS.lon;
+
+      Serial.print(latt, 4); Serial.print(lattChar); Serial.print(" , "); Serial.print(lonn, 4); Serial.print(lonnChar);
+      Serial.println(" ...");
     }
   }
 }
