@@ -3,7 +3,7 @@
 #include <Keypad.h>         //keypad
 #include <SPI.h>            //rfid
 #include <MFRC522.h>        //rfid
-#include <webPage.h>        //webpage
+#include <webpage.h>        //webpage
 //#include <camera.h>         //webpage
 //#include <keypadWeb.h>      //webpage   
 //#include <location.h>       //webpage
@@ -36,6 +36,8 @@ float latt;                    //gps
 char lattChar;
 float lonn;                    //gps
 char lonnChar;
+String latMes;
+String lonMes;
 int fixs;                       //gps
 //bool location = false;          //gps 
 const int TRIG = 14;            //distance
@@ -341,9 +343,15 @@ void handleRoot() { //function to send information to the websight
                        + distanceToString() 
                        + homepage3 
                        + distanceMessageBox() 
-                       + homepage4 
+                       + homepage4
+                       + rfidUser() 
+                       + homepage5 
                        + rfidMessageBox() 
-                       + homepage5;
+                       + homepage6
+                       + latMessage()
+                       + homepage7
+                       + lonMessage()
+                       + homepage8;
   server.send(200, "text/html", serverMessage);
 }
 
@@ -360,33 +368,6 @@ void handleNotFound() { //if you cant connect the server will send this error 40
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
-}
-
-// void handleCamera() { //loads the camera html file
-//   server.send(200, "text/html", CAMERA_HTML);
-// }
-
-// void handleKeypad() { //loads the keypad html file
-//   //webScreen = "____";
-//   //keyIndex = 0;
-//   server.send(200, "text/html", KEYPAD_HTML);
-// }
-
-// void handleLocation() { //loads the location html file
-//   server.send(200, "text/html", LOCATION_HTML);
-// }
-
-float distanceRead() {  //same function as above and bellow but allows the belwo function distancemessagebox() to let the webserver know if its safe or not 
-  digitalWrite(TRIG, LOW);
-  delayMicroseconds(5);
-  digitalWrite(TRIG, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(TRIG, LOW);
-
-  dura = pulseIn(ECHO, HIGH, 20000); //timeout after 20ms
-  dist = (dura * 0.0343) / 2; //convert to cm
-
-  return dist;
 }
 
 String distanceToString() { //converts the distance reading to a string so it can be displayed on the websight
@@ -407,10 +388,10 @@ String serverMessageBox() { //displays to the webserver what the state of the al
   String serMes = "Error";
 
   if (alarmStatus == 1) {
-    serMes = "Alamra Status<br>-ACTIVE-";
+    serMes = "ACTIVE";
   }
   else {
-    serMes = "Alamra Status<br>-DISABLED-";
+    serMes = "DISARMED";
   }
 
   return serMes; 
@@ -424,10 +405,28 @@ String distanceMessageBox() {  //displays to the webserver using above function 
     disMes = "NO MOVEMENT";
   }
   else {
-    disMes = "MOVEMENT\nDETECTED";
+    disMes = "MOVEMENT";
   }
 
   return disMes; 
+}
+
+String rfidUser() { //after a card has been scaned this function tells the webserver if it was the saved key card or a key fob, and if it dosent know the card it says no match 
+  String userMes = "Error";  
+
+  switch (card) {
+    case 0: userMes = "Unknown"; break;
+    case 1:
+      switch (unlock) {
+        case 1: userMes = "Seth1"; break;
+        case 2: userMes = "Seth2"; break;
+        default: userMes = "Switch Error";
+      } break;
+    case 2: userMes = "NO MATCH"; break;
+    default: userMes = "Switch Error";
+  }
+  
+  return userMes; 
 }
 
 String rfidMessageBox() { //after a card has been scaned this function tells the webserver if it was the saved key card or a key fob, and if it dosent know the card it says no match 
@@ -448,12 +447,15 @@ String rfidMessageBox() { //after a card has been scaned this function tells the
   return cardMes; 
 }
 
-/*
-String webDisplay() {
-  return webScreen;
+String latMessage() {
+  gps();
+  return latMes;
 }
-*/
 
+String lonMessage() {
+  gps();
+  return lonMes;
+}
 //this function gets information from the javascript in the keypadWeb.h files keypad buttons to act just like the phisical keypad 
 //this function can also do the check code function to check what has been input is correct to avoid issues that would keep freezing the webserver and lcd display 
 //only on the webserver keypad, you have to press the * key to progress to the next state as without this implamentation, the last number input would not display on the webserver
@@ -598,6 +600,9 @@ void gps() {
 
       Serial.print(latt, 4); Serial.print(lattChar); Serial.print(" , "); Serial.print(lonn, 4); Serial.print(lonnChar);
       Serial.println(" ...");
+
+      latMes = latt + lattChar;
+      lonMes = lonn + lonnChar;
     }
   }
 }
