@@ -211,9 +211,8 @@ String homepage8 = R"=====(
       </div>
 
       <div class="item">
-          <h2><u>Extra</u></h1>
-          <p>Ex1</p>
-          <p>Ex2</p>
+          <h2><u>Humidity</u></h1>
+          <p>50%</p>
       </div>
     </div>
 
