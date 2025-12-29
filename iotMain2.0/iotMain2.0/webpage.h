@@ -1,0 +1,272 @@
+String homepage1 = R"=====( 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0", viewpoint-fir="cover">
+    
+    <title>Security system WebServer</title>
+</head>
+  <style>
+    body {
+      background-color: black;
+    }
+    .header {
+      display: flex;
+      flex-direction: column;
+      background-color: black;
+      align-items: center;
+      border: 2px solid rgb(219, 7, 113); 
+      border-radius: 50px;
+      margin-bottom: 200px;
+    }
+    .footer {
+      display: flex;
+      background-color: black;
+      align-items: center;
+      border: 2px solid rgb(219, 7, 113);
+      border-radius: 50px;
+      height: 25px;
+      justify-content: center;
+      z-index: 1000;
+      position: fixed;
+      bottom: 10px;
+      padding: 10px;
+    }
+    #copy {
+      font-size: 20px;
+      color: cyan;
+    }
+    .container {
+      display: flex;
+      flex-direction: row;
+      align-items:center;
+      justify-content: space-evenly;
+      flex-wrap: wrap;
+    }
+    .item {
+      border: 2px solid rgb(219, 7, 113);
+      width: 275px;
+      height: 180px;
+      background-color: black;
+      margin-bottom: 75px;
+    }
+    .container1 {
+      display: flex;
+      flex-direction: row;
+      align-items:center;
+      justify-content: space-evenly;
+      flex-wrap: wrap;
+    }
+    .item1 {
+      margin-bottom: 100px;
+    }
+    h1 {
+      font: bold;
+      font-size: 40px;
+      font-family: arial;
+      color: cyan;
+      text-align: center;
+    }
+    h2 {
+      font: bold;
+      font-size: 30px;
+      font-family: arial;
+      color: cyan;
+      text-align: center;
+    }
+    p {
+      font-size: 20px;
+      font-family: arial;
+      color: cyan;
+      text-align: center;
+    }
+    button {
+      padding: 15px 30px;
+      border-radius: 50px;
+      border-color: rgb(219, 7, 113);
+      font-size: medium;
+      font-weight: bold;
+      text-decoration: none;
+      background-color: black;
+      color: cyan;
+      
+    }
+    button:hover {
+      background-color: cyan;
+      cursor: pointer;
+      color: rgb(219, 7, 113);
+    }
+    #popup {
+      border: 2px solid rgb(219, 7, 113);
+      width: 420px;
+      height: 600px;
+      background-color: black;
+      margin-bottom: 150px;
+    }
+    .popup1 {
+      border: 3px solid rgb(219, 7, 113);
+      margin: 10px;
+      border-radius: 50px; 
+    }
+    .keypad {
+      width: 100px;
+      height: 100px;
+      border-radius: 25px;
+      border-color: rgb(219, 7, 113);
+      font-weight: bold;
+      text-decoration: none;
+      margin-left: 25px;
+      margin-top: 5px;
+      font-size: xx-large;
+    }
+    #popup2 {
+      border: 2px solid rgb(219, 7, 113);
+      width: 420px;
+      height: 675px;
+      background-color: black;
+      margin-bottom: 75px;
+    }
+    .popup2Box {
+      border: 3px solid rgb(219, 7, 113);
+      margin: 10px;
+      height: 580px;
+      border-radius: 50px;
+    }
+     #popup3 {
+      border: 2px solid rgb(219, 7, 113);
+      width: 420px;
+      height: 500px;
+      background-color: black;
+      margin-bottom: 200px;
+    }
+    #cam {
+      margin: 50px;
+      width: 320px;
+      height: 240px;
+      transform: scaleY(-1);
+      background-color: black;
+      border: 2px solid rgb(219, 7, 113);
+    }
+    #close {
+      margin-left: 155px;
+    }
+  </style>
+
+  <body>
+    <div class="header">
+        <h1>Security System WebServer</h1>
+    </div>
+
+    <div class="container">
+      <!--Infomation-->
+      <div class="item">
+        <h2><u>Alarm Status</u></h1>
+        <p>Active / Disarmed / Alert</p>
+      </div>
+
+      <div class="item">
+        <h2><u>Distance</u></h1>
+        <p>123.45 Cm</p>
+        <p>No Movment / Movment</p>
+      </div>
+
+      <div class="item">
+          <h2><u>Key</u></h1>
+          <p>User: Seth</p>
+          <P>Key: Fob / Card</P>
+      </div>
+
+      <div class="item">
+          <h2><u>Location</u></h1>
+          <p>Latitude: 0000.0000X</p>
+          <p>Longitude: 0000.0000Y</p>
+      </div>
+
+      <div class="item">
+        <h2><u>Temprature</u></h1>
+        <p>20°C</p>
+        <p>68°F</p>
+      </div>
+
+      <div class="item">
+          <h2><u>Extra</u></h1>
+          <p>Ex1</p>
+          <p>Ex2</p>
+      </div>
+    </div>
+
+    <!--popup-->
+    <div popover id="popup">
+      <table>
+        <tr>
+          <th><button class="keypad" onclick="sendkey('1')">1</button></th>
+          <th><button class="keypad" onclick="sendkey('2')">2</button></th>
+          <th><button class="keypad" onclick="sendkey('3')">3</button></th>
+        </tr>
+        <tr>
+          <th><button class="keypad" onclick="sendkey('4')">4</button></th>
+          <th><button class="keypad" onclick="sendkey('5')">5</button></th>
+          <th><button class="keypad" onclick="sendkey('6')">6</button></th>
+        </tr>
+        <tr>
+          <th><button class="keypad" onclick="sendkey('7')">7</button></th>
+          <th><button class="keypad" onclick="sendkey('8')">8</button></th>
+          <th><button class="keypad" onclick="sendkey('9')">9</button></th>
+        </tr>
+        <tr>
+          <th><button class="keypad" onclick="sendkey('%2A')">*</button></th>
+          <th><button class="keypad" onclick="sendkey('0')">0</button></th>
+          <th><button class="keypad" onclick="sendkey('%23')">#</button></th>
+        </tr>
+      </table>
+      <div class="popup1">
+        <p id="webDisplay">____</p>
+      </div>
+      <button popovertarget="popup" popovertargetaction="hide" id="close">Close</button>
+    </div>
+
+    <div popover id="popup2">
+      <div class="popup2Box">
+        <p>Latitude: 0000.0000X</p>
+        <p>Longitude: 0000.0000Y</p>
+      </div>
+      <button popovertarget="popup2" popovertargetaction="hide" id="close">Close</button>
+    </div>
+
+    <div popover id="popup3">
+      <div class="camera">
+        <iframe id="cam" src="http://10.231.187.212:81/stream" title="Camera Feed"></iframe>
+      </div>
+      <button popovertarget="popup3" popovertargetaction="hide" id="close">Close</button>
+    </div>
+      
+
+    <!-- Buttons -->
+    <div class="container1">
+      <div class="item1">
+        <button popovertarget="popup">Open Keypad</button>
+      </div>
+
+      <div class="item1">
+        <button popovertarget="popup2">View Location</button>
+      </div>
+
+      <div class="item1">
+        <button popovertarget="popup3">View Camera</button>
+      </div>
+    </div>
+    <div class="footer">
+      <p id="copy">Copyright &copy; 2025 Seth Butler</p>
+    </div>
+
+    <script>
+      function sendkey(key) {
+        fetch('/pressKey?key=' + key)
+          .then(response => response.text())
+          .then(data => {document.getElementById('webDisplay').innerText = data;});
+      }
+    </script>
+  </body>
+</html>
+)=====";
