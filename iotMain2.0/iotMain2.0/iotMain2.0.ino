@@ -64,11 +64,17 @@ void setup() {
   esp_now_register_recv_cb(esp_now_recv_cb_t(OnDataRecv));
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    String serverData = homepage1
-                    + String(incomingReadings.dist) + " cm"
-                    + homepage2;
-  request->send(200, "text/html", serverData);
+  request->send(200, "text/html", index_html);
   });
+
+  events.onConnect([](AsyncEventSourceClient *client){
+    if(client->lastId()){
+      Serial.printf("Client reconnected! Last message ID that it got is: %u\n", client->lastId());
+    }
+    client->send("hello!", NULL, millis(), 10000);
+  });
+
+  server.addHandler(&events);
   server.begin();
 
   lcd.print("Loading"); 
@@ -79,5 +85,10 @@ void setup() {
 }
 
 void loop() {
-
+  static unsigned long lastEventTime = millis();
+  static const unsigned long EVENT_INTERVAL_MS = 5000;
+  if ((millis() - lastEventTime) > EVENT_INTERVAL_MS) {
+    events.send("ping",NULL,millis());
+    lastEventTime = millis();
+  }
 }
