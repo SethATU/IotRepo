@@ -167,7 +167,10 @@ String homepage1 = R"=====(
 
       <div class="item">
         <h2><u>Distance</u></h1>
-        <p>123.45 Cm</p>
+        <p>
+)=====";
+String homepage2 = R"=====( 
+        </p>
         <p>No Movment / Movment</p>
       </div>
 

@@ -1,48 +1,77 @@
 #include <webpage.h>
-#include <WiFi.h>     
-#include <ESPmDNS.h>  
-#include <WebServer.h>
 #include <Wire.h>   
 #include "rgb_lcd.h"
+#include <esp_now.h>
+#include <WiFi.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <Arduino_JSON.h>
 
 rgb_lcd lcd;
 
 const char* ssid = "Backup";         
 const char* password = "nonono12345";
 
-WebServer server(80);
+typedef struct struct_message {
+  float dist;
+} struct_message;
+
+struct_message incomingReadings;
+
+JSONVar board;
+
+AsyncWebServer server(80);
+AsyncEventSource events("/events");
+
+void OnDataRecv(const uint8_t * mac_addr, const uint8_t *incomingData, int len) { 
+  char macStr[18];
+  Serial.print("Packet received from: ");
+  snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x",
+           mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
+  Serial.println(macStr);
+  memcpy(&incomingReadings, incomingData, sizeof(incomingReadings));
+
+  board["distance"] = incomingReadings.dist;
+
+  String jsonString = JSON.stringify(board);
+  events.send(jsonString.c_str(), "new_readings", millis());
+  
+  Serial.printf("DISTANCE: %2f cm\n", incomingReadings.dist);
+  Serial.println();
+}
 
 void setup() {
   Serial.begin(115200);
-
   Wire.begin(27, 26);
   lcd.begin(16, 2);   
 
-  WiFi.mode(WIFI_STA);       
+  WiFi.mode(WIFI_AP_STA);       
   WiFi.begin(ssid, password);
-  Serial.println("");        
-
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+    delay(1000);
+    Serial.println("Setting as a Wi-Fi Station..");
   }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
-  Serial.print("IP address: ");
+  Serial.print("Station IP Address: ");
   Serial.println(WiFi.localIP());
-  if (MDNS.begin("esp32")) {
-    Serial.println("MDNS responder started");
-  }
-  server.on("/", handleRoot);
-  server.on("/inline", []() {
-    server.send(200, "text/plain", "this works as well");
-  });
-  server.onNotFound(handleNotFound);
-  server.begin();
-  Serial.println("HTTP server started");
+  Serial.print("Wi-Fi Channel: ");
+  Serial.println(WiFi.channel());       
 
-  lcd.print("Loading"); //little loading bar printed to lcd
+  if (esp_now_init() != ESP_OK) {
+    Serial.println("Error initializing ESP-NOW");
+    return;
+  }
+  
+  esp_now_register_recv_cb(esp_now_recv_cb_t(OnDataRecv));
+
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    String serverData = homepage1
+                    + String(incomingReadings.dist) + " cm"
+                    + homepage2;
+  request->send(200, "text/html", serverData);
+  });
+  server.begin();
+
+  lcd.print("Loading"); 
   for (int l = 0; l < 9; l++) {
     lcd.print(".");
     delay(250);
@@ -50,26 +79,5 @@ void setup() {
 }
 
 void loop() {
-  server.handleClient();
-  delay(2);
-}
 
-void handleRoot() {
-  String serverData = homepage1;
-  server.send(200, "text/html", serverData);
-}
-
-void handleNotFound() {
-  String message = "File Not Found\n\n";
-  message += "URI: ";
-  message += server.uri();
-  message += "\nMethod: ";
-  message += (server.method() == HTTP_GET) ? "GET" : "POST";
-  message += "\nArguments: ";
-  message += server.args();
-  message += "\n";
-  for (uint8_t i = 0; i < server.args(); i++) {
-    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
-  }
-  server.send(404, "text/plain", message);
 }
