@@ -1,4 +1,4 @@
-String homepage1 = R"=====( 
+const char index_html[] PROGMEM = R"rawliteral() 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -167,10 +167,7 @@ String homepage1 = R"=====(
 
       <div class="item">
         <h2><u>Distance</u></h1>
-        <p>
-)=====";
-String homepage2 = R"=====( 
-        </p>
+        <p id="distanceData"> cm</p>
         <p>No Movment / Movment</p>
       </div>
 
@@ -269,7 +266,30 @@ String homepage2 = R"=====(
           .then(response => response.text())
           .then(data => {document.getElementById('webDisplay').innerText = data;});
       }
+
+      if (!!window.EventSource) {
+        var source = new EventSource('/events');
+        
+        source.addEventListener('open', function(e) {
+          console.log("Events Connected");
+        }, false);
+        source.addEventListener('error', function(e) {
+          if (e.target.readyState != EventSource.OPEN) {
+            console.log("Events Disconnected");
+          }+
+        }, false);
+        
+        source.addEventListener('message', function(e) {
+          console.log("message", e.data);
+        }, false);
+        
+        source.addEventListener('new_readings', function(e) {
+          console.log("new_readings", e.data);
+          var obj = JSON.parse(e.data);
+          document.getElementById("distanceData").innerHTML = obj.distance.toFixed(2) + " cm";
+        }, false);
+      }
     </script>
   </body>
 </html>
-)=====";
+)rawliteral";
