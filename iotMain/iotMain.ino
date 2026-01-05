@@ -397,19 +397,19 @@ String serverMessageBox() { //displays to the webserver what the state of the al
   return serMes; 
 }
 
-String distanceMessageBox() {  //displays to the webserver using above function weather or not movment has been detected 
-  int d = distanceRead();
-  String disMes = "Error";
+// String distanceMessageBox() {  //displays to the webserver using above function weather or not movment has been detected 
+//   int d = distanceRead();
+//   String disMes = "Error";
 
-  if (d > 20) {
-    disMes = "NO MOVEMENT";
-  }
-  else {
-    disMes = "MOVEMENT";
-  }
+//   if (d > 20) {
+//     disMes = "NO MOVEMENT";
+//   }
+//   else {
+//     disMes = "MOVEMENT";
+//   }
 
-  return disMes; 
-}
+//   return disMes; 
+// }
 
 String rfidUser() { //after a card has been scaned this function tells the webserver if it was the saved key card or a key fob, and if it dosent know the card it says no match 
   String userMes = "Error";  
