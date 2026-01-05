@@ -1,13 +1,9 @@
 #include <webpage.h>
-#include <Wire.h>   
-#include "rgb_lcd.h"
 #include <esp_now.h>
 #include <WiFi.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <Arduino_JSON.h>
-
-rgb_lcd lcd;
 
 const char* ssid = "Backup";         
 const char* password = "nonono12345";
@@ -42,8 +38,6 @@ void OnDataRecv(const uint8_t * mac_addr, const uint8_t *incomingData, int len) 
 
 void setup() {
   Serial.begin(115200);
-  Wire.begin(27, 26);
-  lcd.begin(16, 2);   
 
   WiFi.mode(WIFI_AP_STA);       
   WiFi.begin(ssid, password);
@@ -76,12 +70,6 @@ void setup() {
 
   server.addHandler(&events);
   server.begin();
-
-  lcd.print("Loading"); 
-  for (int l = 0; l < 9; l++) {
-    lcd.print(".");
-    delay(250);
-  }
 }
 
 void loop() {
