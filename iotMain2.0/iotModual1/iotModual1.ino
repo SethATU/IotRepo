@@ -22,7 +22,7 @@ const long interval = 10000;
 
 uint8_t broadcastAddress[] = {0x84, 0x0D, 0x8E, 0xE6, 0x8F, 0xB4};
 
-typedef struct struct_message {
+typedef struct struct_message1 {
   float dist;
   float humi;
   float celc;
@@ -32,11 +32,11 @@ typedef struct struct_message {
   char latC;
   char lonC;
   int move;
-} struct_message;
+} struct_message1;
 
 esp_now_peer_info_t peerInfo;
 
-struct_message myData;
+struct_message1 myData;
 
 constexpr char WIFI_SSID[] = "Backup";
 
