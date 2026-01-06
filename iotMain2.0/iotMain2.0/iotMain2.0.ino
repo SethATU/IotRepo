@@ -11,6 +11,9 @@
 const char* ssid = "Backup";         
 const char* password = "nonono12345";
 String moveString = "Error";
+String alarmString = "Error";
+String userString = "Error";
+String keyString = "Error";
 
 typedef struct struct_message1 {
   float dist;
@@ -44,14 +47,25 @@ void OnDataRecv(const uint8_t * mac_addr, const uint8_t *incomingData, int len) 
     memcpy(&incomingReadings2, incomingData, sizeof(incomingReadings2));
   }
   
-
   if(incomingReadings1.move == 1) { moveString = "Movement";}
   else { moveString = "No Movement"; }
-  board["alarm"] = incomingReadings2.alar;
+
+  if(incomingReadings2.alar == 0) { alarmString = "Disarmed"; }
+  else { alarmString = "Active"; }
+
+  if(incomingReadings2.user == 1) { userString = "Seth K"; }
+  else if(incomingReadings2.user == 2) { userString = "Seth F"; }
+  else { userString = "Unknown"; }
+
+  if(incomingReadings2.key == 1) { keyString = "Card"; }
+  else if(incomingReadings2.key == 2) { keyString = "Fob"; }
+  else { keyString = "Unknown"; }
+
+  board["alarm"] = alarmString;
   board["distance"] = incomingReadings1.dist;
   board["movement"] = moveString;
-  board["user"] = incomingReadings2.user;
-  board["key"] = incomingReadings2.key;
+  board["user"] = userString;
+  board["key"] = keyString;
   board["latitude"] = incomingReadings1.latt;  
   board["latitudeX"] = String(incomingReadings1.latC);
   board["longitude"] = incomingReadings1.lonn;   
@@ -63,7 +77,7 @@ void OnDataRecv(const uint8_t * mac_addr, const uint8_t *incomingData, int len) 
   String jsonString = JSON.stringify(board);
   events.send(jsonString.c_str(), "new_readings", millis());
   
-  /*serial print the data that is sent from modual 1*/
+  /*serial print the data that is sent from modual 1 and 2*/
 
   Serial.printf("DISTANCE: %.2fcm\n", incomingReadings1.dist);
   Serial.printf("MOVEMENT: %d\n", incomingReadings1.move);  
@@ -124,12 +138,11 @@ void loop() {
     lastEventTime = millis();
   }
 
-  /*
-  if(incomingReadings.move == 1) {
+  if(incomingReadings1.move == 1 && incomingReadings2.alar == 1) {
+    alarmString = "Alert";
     digitalWrite(BUZZ, HIGH);
     delay(250);
     digitalWrite(BUZZ, LOW);
     delay(250);
   }
-  */
 }
