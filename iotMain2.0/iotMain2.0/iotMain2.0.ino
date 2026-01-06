@@ -1,4 +1,5 @@
-#include <webpage.h>
+//#include <webpage.h>
+#include <testWebpage.h>
 #include <esp_now.h>
 #include <WiFi.h>
 #include <AsyncTCP.h>
@@ -10,6 +11,13 @@ const char* password = "nonono12345";
 
 typedef struct struct_message {
   float dist;
+  float humi;
+  float celc;
+  float fara;
+  float latt;
+  float lonn;
+  char latC;
+  char lonC;
 } struct_message;
 
 struct_message incomingReadings;
@@ -27,13 +35,30 @@ void OnDataRecv(const uint8_t * mac_addr, const uint8_t *incomingData, int len) 
   Serial.println(macStr);
   memcpy(&incomingReadings, incomingData, sizeof(incomingReadings));
 
+  //board["alarm"] = incomingReadings.alar;
   board["distance"] = incomingReadings.dist;
+  //board["movement"] = incomingReadings.move;
+  //board["user"] = incomingReadings.user;
+  //board["key"] = incomingReadings.key;
+  board["latitude"] = incomingReadings.latt;  
+  board["latitudeX"] = String(incomingReadings.latC);
+  board["longitude"] = incomingReadings.lonn;   
+  board["longitudeY"] = String(incomingReadings.lonC);
+  board["celcius"] = incomingReadings.celc;
+  board["farenheight"] = incomingReadings.fara;
+  board["humidity"] = incomingReadings.humi;
 
   String jsonString = JSON.stringify(board);
   events.send(jsonString.c_str(), "new_readings", millis());
   
-  Serial.printf("DISTANCE: %2f cm\n", incomingReadings.dist);
-  Serial.println();
+  //serial print the data that is sent from modual 1
+  Serial.printf("DISTANCE: %.2fcm\n", incomingReadings.dist);
+  Serial.printf("HUMIDITY: %.2f%%\n", incomingReadings.humi);
+  Serial.printf("CELCIUS: %.2f°C\n", incomingReadings.celc);
+  Serial.printf("FARENHEIGHT: %.2f°F\n", incomingReadings.fara);
+  Serial.printf("LATITUDE: %.4f %c\n", incomingReadings.latt, incomingReadings.latC);
+  Serial.printf("LONGITUDE: %.4f %c\n", incomingReadings.lonn, incomingReadings.lonC);
+  Serial.printf("------------------------------------------------\n");
 }
 
 void setup() {

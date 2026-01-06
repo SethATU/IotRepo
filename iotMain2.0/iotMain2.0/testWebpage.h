@@ -1,0 +1,76 @@
+const char index_html[] PROGMEM = R"rawliteral() 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0", viewpoint-fir="cover">
+    
+    <title>Security system WebServer</title>
+</head>
+<body>
+    <h1>Security System Test WebServer</h1>
+
+    <h2>Alarm Status</h2>
+    <p id="alarmData">Active / Disarmed / Alert</p>
+
+    <h2>Distance</h2>
+    <p id="distanceData">0.00 cm</p>
+    <p id="movementData">No Movment / Movment</p>
+
+    <h2>Key</h2>
+    <p id="userData">User: Seth</p>
+    <P id="keyData">Key: Fob / Card</P>
+
+    <h2>Location</h2>
+    <p id="latitudeData">Latitude: 0000.0000X</p>
+    <p id="longitudeData">Longitude: 0000.0000Y</p>
+
+    <h2>Temprature</h2>
+    <p id="celciusData">00°C</p>
+    <p id="farenheightData">00°F</p>
+
+    <h2>Humidity</h2>
+    <p id="humiduityData">0.00 %</p>
+
+<script>
+    function sendkey(key) {
+    fetch('/pressKey?key=' + key)
+        .then(response => response.text())
+        .then(data => {document.getElementById('webDisplay').innerText = data;});
+    }
+
+    if (!!window.EventSource) {
+    var source = new EventSource('/events');
+    
+    source.addEventListener('open', function(e) {
+        console.log("Events Connected");
+    }, false);
+    source.addEventListener('error', function(e) {
+        if (e.target.readyState != EventSource.OPEN) {
+        console.log("Events Disconnected");
+        }
+    }, false);
+    
+    source.addEventListener('message', function(e) {
+        console.log("message", e.data);
+    }, false);
+    
+    source.addEventListener('new_readings', function(e) {
+        console.log("new_readings", e.data);
+        var obj = JSON.parse(e.data);
+        document.getElementById("alarmData").innerHTML = obj.alarm;
+        document.getElementById("distanceData").innerHTML = obj.distance.toFixed(2) + " cm";
+        document.getElementById("movementData").innerHTML = obj.movement;
+        document.getElementById("userData").innerHTML = "User: " + obj.user;
+        document.getElementById("keyData").innerHTML = "Key: " + obj.key;
+        document.getElementById("latitudeData").innerHTML = "Latitude: " + obj.latitude.toFixed(4) + " " + obj.latitudeX;
+        document.getElementById("longitudeData").innerHTML = "Longitude: " + obj.longitude.toFixed(4) + " " + obj.longitudeY;
+        document.getElementById("celciusData").innerHTML = obj.celcius.toFixed(2) + "°C";
+        document.getElementById("farenheightData").innerHTML = obj.farenheight.toFixed(2) + "°F";
+        document.getElementById("humiduityData").innerHTML = obj.humidity.toFixed(2) + "%";
+    }, false);
+    }
+</script>
+</body>
+</html>
+)rawliteral";

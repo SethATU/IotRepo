@@ -27,8 +27,10 @@ typedef struct struct_message {
   float humi;
   float celc;
   float fara;
-  String latt;
-  String lonn;
+  float latt;
+  float lonn;
+  char latC;
+  char lonC;
 } struct_message;
 
 esp_now_peer_info_t peerInfo;
@@ -56,9 +58,11 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
 void setup() {
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  esp_wifi_set_channel(6, WIFI_SECOND_CHAN_NONE);
   dht11.begin();
 
-  Serial2.begin(9600, SERIAL_8N1, 16, 17);
+  Serial2.begin(9600, SERIAL_8N1, 17, 16);
   GPS.begin(9600);
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
   GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ); 
@@ -94,13 +98,36 @@ void setup() {
 }
 
 void loop() {
+  GPS.read();
+
+  if (GPS.newNMEAreceived()) {
+    if (!GPS.parse(GPS.lastNMEA())) 
+      return; 
+  }
+
+  if (millis() - timer > 2000) {
+    timer = millis(); 
+
+    if (GPS.fix) {
+      myData.latt = GPS.latitude;
+      myData.latC = GPS.lat;
+      myData.lonn = GPS.longitude;
+      myData.lonC = GPS.lon;
+
+      //remove later
+      Serial.print("Location: ");
+      Serial.print(GPS.latitude, 4); Serial.print(GPS.lat);
+      Serial.print(", ");
+      Serial.print(GPS.longitude, 4); Serial.println(GPS.lon);
+    }
+  }
+
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
     
     distanceRead();
     tempHumRead();
-    gpsRead();
 
     esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
     if (result == ESP_OK) {
@@ -137,23 +164,5 @@ void tempHumRead() {
     myData.humi = humidity;
     myData.celc = temperature_C;
     myData.fara = temperature_F;
-  }
-}
-
-void gpsRead() {
-  GPS.read();
-
-  if (GPS.newNMEAreceived()) {
-    if (!GPS.parse(GPS.lastNMEA())) 
-      return; 
-  }
-
-  if (millis() - timer > 2000) {
-    timer = millis(); 
-
-    if (GPS.fix) {
-      myData.latt = GPS.latitude + GPS.lat;
-      myData.lonn = GPS.longitude + GPS.lon;
-    }
   }
 }
