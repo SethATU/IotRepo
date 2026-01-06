@@ -167,7 +167,7 @@ const char index_html[] PROGMEM = R"rawliteral()
 
       <div class="item">
         <h2><u>Distance</u></h1>
-        <p id="distanceData"> cm</p>
+        <p id="distanceData">0.00 cm</p>
         <p>No Movment / Movment</p>
       </div>
 
@@ -179,20 +179,19 @@ const char index_html[] PROGMEM = R"rawliteral()
 
       <div class="item">
           <h2><u>Location</u></h1>
-          <p>Latitude: 0000.0000X</p>
-          <p>Longitude: 0000.0000Y</p>
+          <p id="latitudeData">Latitude: 0000.0000X</p>
+          <p id="longitudeData">Longitude: 0000.0000Y</p>
       </div>
 
       <div class="item">
         <h2><u>Temprature</u></h1>
-        <p>20°C</p>
-        <p>68°F</p>
+        <p id="celciusData">00°C</p>
+        <p id="farenheightData">00°F</p>
       </div>
 
       <div class="item">
-          <h2><u>Extra</u></h1>
-          <p>Ex1</p>
-          <p>Ex2</p>
+          <h2><u>Humidity</u></h1>
+          <p id="humiduityData">0.00 %</p>
       </div>
     </div>
 
@@ -287,6 +286,11 @@ const char index_html[] PROGMEM = R"rawliteral()
           console.log("new_readings", e.data);
           var obj = JSON.parse(e.data);
           document.getElementById("distanceData").innerHTML = obj.distance.toFixed(2) + " cm";
+          document.getElementById("latitudeData").innerHTML = obj.latitude;
+          document.getElementById("longitudeData").innerHTML = obj.longitude;
+          document.getElementById("celciusData").innerHTML = obj.celcius + "°C";
+          document.getElementById("farenheightData").innerHTML = obj.farenheight + "°F";
+          document.getElementById("humidityData").innerHTML = obj.humidity + "%";
         }, false);
       }
     </script>
