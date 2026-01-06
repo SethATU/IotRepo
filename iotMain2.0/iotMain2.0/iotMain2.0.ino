@@ -12,7 +12,7 @@ const char* ssid = "Backup";
 const char* password = "nonono12345";
 String moveString = "Error";
 
-typedef struct struct_message {
+typedef struct struct_message1 {
   float dist;
   float humi;
   float celc;
@@ -22,9 +22,15 @@ typedef struct struct_message {
   char latC;
   char lonC;
   int move;
-} struct_message;
+} struct_message1;
+struct_message1 incomingReadings1;
 
-struct_message incomingReadings;
+typedef struct struct_message2 {
+  int alar;
+  int user;
+  int key;
+} struct_message2;
+struct_message2 incomingReadings2;
 
 JSONVar board;
 
@@ -32,42 +38,44 @@ AsyncWebServer server(80);
 AsyncEventSource events("/events");
 
 void OnDataRecv(const uint8_t * mac_addr, const uint8_t *incomingData, int len) { 
-  char macStr[18];
-  Serial.print("Packet received from: ");
-  snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x",
-           mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
-  Serial.println(macStr);
-  memcpy(&incomingReadings, incomingData, sizeof(incomingReadings));
+  if(len == sizeof(struct_message1)) {
+    memcpy(&incomingReadings1, incomingData, sizeof(incomingReadings1));
+  } else if(len == sizeof(struct_message2)) {
+    memcpy(&incomingReadings2, incomingData, sizeof(incomingReadings2));
+  }
+  
 
-  if(incomingReadings.move == 1) { moveString = "Movement";}
+  if(incomingReadings1.move == 1) { moveString = "Movement";}
   else { moveString = "No Movement"; }
-  //board["alarm"] = incomingReadings.alar;
-  board["distance"] = incomingReadings.dist;
+  board["alarm"] = incomingReadings2.alar;
+  board["distance"] = incomingReadings1.dist;
   board["movement"] = moveString;
-  //board["user"] = incomingReadings.user;
-  //board["key"] = incomingReadings.key;
-  board["latitude"] = incomingReadings.latt;  
-  board["latitudeX"] = String(incomingReadings.latC);
-  board["longitude"] = incomingReadings.lonn;   
-  board["longitudeY"] = String(incomingReadings.lonC);
-  board["celcius"] = incomingReadings.celc;
-  board["farenheight"] = incomingReadings.fara;
-  board["humidity"] = incomingReadings.humi;
+  board["user"] = incomingReadings2.user;
+  board["key"] = incomingReadings2.key;
+  board["latitude"] = incomingReadings1.latt;  
+  board["latitudeX"] = String(incomingReadings1.latC);
+  board["longitude"] = incomingReadings1.lonn;   
+  board["longitudeY"] = String(incomingReadings1.lonC);
+  board["celcius"] = incomingReadings1.celc;
+  board["farenheight"] = incomingReadings1.fara;
+  board["humidity"] = incomingReadings1.humi;
 
   String jsonString = JSON.stringify(board);
   events.send(jsonString.c_str(), "new_readings", millis());
   
-  //serial print the data that is sent from modual 1
-  //Serial.printf("ALARM: %d\n", incomingReadings.alar);
-  Serial.printf("DISTANCE: %.2fcm\n", incomingReadings.dist);
-  Serial.printf("MOVEMENT: %d\n", incomingReadings.move);
-  //Serial.printf("USER: %d\n", incomingReadings.user);
-  //Serial.printf("KEY: %d\n", incomingReadings.key);
-  Serial.printf("LATITUDE: %.4f %c\n", incomingReadings.latt, incomingReadings.latC);
-  Serial.printf("LONGITUDE: %.4f %c\n", incomingReadings.lonn, incomingReadings.lonC);
-  Serial.printf("CELCIUS: %.2f°C\n", incomingReadings.celc);
-  Serial.printf("FARENHEIGHT: %.2f°F\n", incomingReadings.fara);
-  Serial.printf("HUMIDITY: %.2f%%\n", incomingReadings.humi);
+  /*serial print the data that is sent from modual 1*/
+
+  Serial.printf("DISTANCE: %.2fcm\n", incomingReadings1.dist);
+  Serial.printf("MOVEMENT: %d\n", incomingReadings1.move);  
+  Serial.printf("LATITUDE: %.4f %c\n", incomingReadings1.latt, incomingReadings1.latC);
+  Serial.printf("LONGITUDE: %.4f %c\n", incomingReadings1.lonn, incomingReadings1.lonC);
+  Serial.printf("CELCIUS: %.2f°C\n", incomingReadings1.celc);
+  Serial.printf("FARENHEIGHT: %.2f°F\n", incomingReadings1.fara);
+  Serial.printf("HUMIDITY: %.2f%%\n", incomingReadings1.humi);
+  Serial.printf("------------------------------------------------\n");
+  Serial.printf("ALARM: %d\n", incomingReadings2.alar);
+  Serial.printf("USER: %d\n", incomingReadings2.user);
+  Serial.printf("KEY: %d\n", incomingReadings2.key);
   Serial.printf("------------------------------------------------\n");
 }
 
@@ -117,7 +125,7 @@ void loop() {
   }
 
   /*
-  while(incomingReadings.move == 1) {
+  if(incomingReadings.move == 1) {
     digitalWrite(BUZZ, HIGH);
     delay(250);
     digitalWrite(BUZZ, LOW);
