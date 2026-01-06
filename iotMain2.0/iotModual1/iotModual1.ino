@@ -31,6 +31,7 @@ typedef struct struct_message {
   float lonn;
   char latC;
   char lonC;
+  int move;
 } struct_message;
 
 esp_now_peer_info_t peerInfo;
@@ -150,6 +151,13 @@ void distanceRead() {
   distance = (duration * 0.0343) / 2; 
 
   myData.dist = distance;
+
+  if(distance < 20){
+    myData.move = 1;
+  }
+  else {
+    myData.move = 0;
+  }
 }
 
 void tempHumRead() {

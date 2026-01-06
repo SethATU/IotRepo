@@ -6,8 +6,11 @@
 #include <ESPAsyncWebServer.h>
 #include <Arduino_JSON.h>
 
+#define BUZZ 32
+
 const char* ssid = "Backup";         
 const char* password = "nonono12345";
+String moveString = "Error";
 
 typedef struct struct_message {
   float dist;
@@ -18,6 +21,7 @@ typedef struct struct_message {
   float lonn;
   char latC;
   char lonC;
+  int move;
 } struct_message;
 
 struct_message incomingReadings;
@@ -35,9 +39,11 @@ void OnDataRecv(const uint8_t * mac_addr, const uint8_t *incomingData, int len) 
   Serial.println(macStr);
   memcpy(&incomingReadings, incomingData, sizeof(incomingReadings));
 
+  if(incomingReadings.move == 1) { moveString = "Movement";}
+  else { moveString = "No Movement"; }
   //board["alarm"] = incomingReadings.alar;
   board["distance"] = incomingReadings.dist;
-  //board["movement"] = incomingReadings.move;
+  board["movement"] = moveString;
   //board["user"] = incomingReadings.user;
   //board["key"] = incomingReadings.key;
   board["latitude"] = incomingReadings.latt;  
@@ -52,12 +58,16 @@ void OnDataRecv(const uint8_t * mac_addr, const uint8_t *incomingData, int len) 
   events.send(jsonString.c_str(), "new_readings", millis());
   
   //serial print the data that is sent from modual 1
+  //Serial.printf("ALARM: %d\n", incomingReadings.alar);
   Serial.printf("DISTANCE: %.2fcm\n", incomingReadings.dist);
-  Serial.printf("HUMIDITY: %.2f%%\n", incomingReadings.humi);
-  Serial.printf("CELCIUS: %.2f°C\n", incomingReadings.celc);
-  Serial.printf("FARENHEIGHT: %.2f°F\n", incomingReadings.fara);
+  Serial.printf("MOVEMENT: %d\n", incomingReadings.move);
+  //Serial.printf("USER: %d\n", incomingReadings.user);
+  //Serial.printf("KEY: %d\n", incomingReadings.key);
   Serial.printf("LATITUDE: %.4f %c\n", incomingReadings.latt, incomingReadings.latC);
   Serial.printf("LONGITUDE: %.4f %c\n", incomingReadings.lonn, incomingReadings.lonC);
+  Serial.printf("CELCIUS: %.2f°C\n", incomingReadings.celc);
+  Serial.printf("FARENHEIGHT: %.2f°F\n", incomingReadings.fara);
+  Serial.printf("HUMIDITY: %.2f%%\n", incomingReadings.humi);
   Serial.printf("------------------------------------------------\n");
 }
 
@@ -95,6 +105,7 @@ void setup() {
 
   server.addHandler(&events);
   server.begin();
+  pinMode(BUZZ, OUTPUT);
 }
 
 void loop() {
@@ -104,4 +115,13 @@ void loop() {
     events.send("ping",NULL,millis());
     lastEventTime = millis();
   }
+
+  /*
+  while(incomingReadings.move == 1) {
+    digitalWrite(BUZZ, HIGH);
+    delay(250);
+    digitalWrite(BUZZ, LOW);
+    delay(250);
+  }
+  */
 }
