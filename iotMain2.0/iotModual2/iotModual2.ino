@@ -33,12 +33,15 @@ MFRC522 rfid(SS_RFID, RST_RFID);
 int code[4] = {1, 2, 3, 4};
 int check[4];
 bool prompt = true;
+bool scan = false;
 int incorrect = 0;
 int alarmState = 0;
 int codeIndex = 0;
 int atempt = 3;
 unsigned long previousMillis = 0;
 const long interval = 10000; 
+bool busy = false;
+bool send = false;
 
 uint8_t broadcastAddress[] = {0x84, 0x0D, 0x8E, 0xE6, 0x8F, 0xB4};
 
@@ -116,22 +119,33 @@ void loop() {
   keypadRead();
 
   unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= interval) {
-    previousMillis = currentMillis;
+  
+  if(!busy && !send) {
+    if (currentMillis - previousMillis >= interval) {
+      previousMillis = currentMillis;
+      sendEspNow();
+    }
+  }
 
-    esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
-    if (result == ESP_OK) {
-      Serial.println("Sent with success");
-    }
-    else {
-      Serial.println("Error sending the data");
-    }
+  if(send && !busy) {
+    sendEspNow();
+    send = false;
+  }
+}
+
+void sendEspNow() {
+  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
+  if (result == ESP_OK) {
+    Serial.println("Sent with success");
+  }
+  else {
+    Serial.println("Error sending the data");
   }
 }
 
 void keypadRead() {
   char key = keypad.getKey();
-  
+
   if(codeIndex == 0 && prompt) {
     if(alarmState == 0) { lcd.print("Alarm Disabled"); }
     else { lcd.print("Alarm Active"); }
@@ -141,6 +155,7 @@ void keypadRead() {
   }
 
   if(key) {  
+    busy = true;
     if(key >= '0' && key <= '9') {
       lcd.print(key);
       check[codeIndex] = key - '0';
@@ -149,6 +164,7 @@ void keypadRead() {
     if(codeIndex == 4) {
       codeIndex = 0;
       prompt = true;
+      delay(1000);
       codeCheck();
     }
   }
@@ -166,6 +182,7 @@ void codeCheck() {
   if(incorrect > 0 && alarmState == 1) { atempt--; }
 
   if(incorrect == 0) {
+    atempt = 3;
     rfidRead();
     return;
   }
@@ -194,9 +211,9 @@ void codeCheck() {
 void rfidRead() {
   lcd.print("2FA / Scan Card:");
   lcd.setCursor(0, 1);
-  
-  while (!rfid.PICC_IsNewCardPresent()) { delay(10); }
-  while (!rfid.PICC_ReadCardSerial()) { delay(10); }
+
+  while(!rfid.PICC_IsNewCardPresent()) { delay(10); } 
+  while(!rfid.PICC_ReadCardSerial()) { delay(10); }
 
   bool isCard = (memcmp(rfid.uid.uidByte, unlockCard, 4) == 0); 
   bool isFob = (memcmp(rfid.uid.uidByte, unlockFob, 4) == 0);
@@ -219,12 +236,16 @@ void rfidRead() {
   }
   else { 
     lcd.print("Not valid");
+    myData.alar = alarmState;
+    myData.user = 0;
+    myData.key = 0;
   }
 
   delay(2000);
   lcd.clear();
   codeIndex = 0;
-  prompt = true;  
-  myData.alar = alarmState;
+  prompt = true; 
+  busy = false;
+  send = true; 
   return;
 }
