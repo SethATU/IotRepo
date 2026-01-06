@@ -161,41 +161,42 @@ const char index_html[] PROGMEM = R"rawliteral()
     <div class="container">
       <!--Infomation-->
       <div class="item">
-        <h2><u>Alarm Status</u></h1>
-        <p>Active / Disarmed / Alert</p>
+        <h2><u>Alarm Status</u></h2>
+        <p id="alarmData">Active / Disarmed / Alert</p>
       </div>
 
       <div class="item">
-        <h2><u>Distance</u></h1>
+        <h2><u>Distance</u></h2>
         <p id="distanceData">0.00 cm</p>
-        <p>No Movment / Movment</p>
+        <p id="movementData">No Movment / Movment</p>
       </div>
 
       <div class="item">
-          <h2><u>Key</u></h1>
-          <p>User: Seth</p>
-          <P>Key: Fob / Card</P>
+        <h2><u>Key</u></h2>
+        <p id="userData">User: Seth</p>
+        <P id="keyData">Key: Fob / Card</P>
       </div>
 
       <div class="item">
-          <h2><u>Location</u></h1>
-          <p id="latitudeData">Latitude: 0000.0000X</p>
-          <p id="longitudeData">Longitude: 0000.0000Y</p>
+        <h2><u>Location</u></h2>
+        <p id="latitudeData">Latitude: 0000.0000X</p>
+        <p id="longitudeData">Longitude: 0000.0000Y</p>
       </div>
 
       <div class="item">
-        <h2><u>Temprature</u></h1>
+        <h2><u>Temprature</u></h2>
         <p id="celciusData">00°C</p>
         <p id="farenheightData">00°F</p>
       </div>
 
       <div class="item">
-          <h2><u>Humidity</u></h1>
+          <h2><u>Humidity</u></h2>
           <p id="humiduityData">0.00 %</p>
       </div>
     </div>
 
     <!--popup-->
+    <!--
     <div popover id="popup">
       <table>
         <tr>
@@ -224,7 +225,7 @@ const char index_html[] PROGMEM = R"rawliteral()
       </div>
       <button popovertarget="popup" popovertargetaction="hide" id="close">Close</button>
     </div>
-
+    -->
     <div popover id="popup2">
       <div class="popup2Box">
         <p>Latitude: 0000.0000X</p>
@@ -243,10 +244,11 @@ const char index_html[] PROGMEM = R"rawliteral()
 
     <!-- Buttons -->
     <div class="container1">
+    <!--
       <div class="item1">
         <button popovertarget="popup">Open Keypad</button>
       </div>
-
+    -->
       <div class="item1">
         <button popovertarget="popup2">View Location</button>
       </div>
@@ -259,41 +261,45 @@ const char index_html[] PROGMEM = R"rawliteral()
       <p id="copy">Copyright &copy; 2025 Seth Butler</p>
     </div>
 
-    <script>
-      function sendkey(key) {
-        fetch('/pressKey?key=' + key)
-          .then(response => response.text())
-          .then(data => {document.getElementById('webDisplay').innerText = data;});
-      }
+<script>
+    function sendkey(key) {
+    fetch('/pressKey?key=' + key)
+        .then(response => response.text())
+        .then(data => {document.getElementById('webDisplay').innerText = data;});
+    }
 
-      if (!!window.EventSource) {
-        var source = new EventSource('/events');
-        
-        source.addEventListener('open', function(e) {
-          console.log("Events Connected");
-        }, false);
-        source.addEventListener('error', function(e) {
-          if (e.target.readyState != EventSource.OPEN) {
-            console.log("Events Disconnected");
-          }+
-        }, false);
-        
-        source.addEventListener('message', function(e) {
-          console.log("message", e.data);
-        }, false);
-        
-        source.addEventListener('new_readings', function(e) {
-          console.log("new_readings", e.data);
-          var obj = JSON.parse(e.data);
-          document.getElementById("distanceData").innerHTML = obj.distance.toFixed(2) + " cm";
-          document.getElementById("latitudeData").innerHTML = obj.latitude;
-          document.getElementById("longitudeData").innerHTML = obj.longitude;
-          document.getElementById("celciusData").innerHTML = obj.celcius + "°C";
-          document.getElementById("farenheightData").innerHTML = obj.farenheight + "°F";
-          document.getElementById("humidityData").innerHTML = obj.humidity + "%";
-        }, false);
-      }
-    </script>
-  </body>
+    if (!!window.EventSource) {
+    var source = new EventSource('/events');
+    
+    source.addEventListener('open', function(e) {
+        console.log("Events Connected");
+    }, false);
+    source.addEventListener('error', function(e) {
+        if (e.target.readyState != EventSource.OPEN) {
+        console.log("Events Disconnected");
+        }
+    }, false);
+    
+    source.addEventListener('message', function(e) {
+        console.log("message", e.data);
+    }, false);
+    
+    source.addEventListener('new_readings', function(e) {
+        console.log("new_readings", e.data);
+        var obj = JSON.parse(e.data);
+        document.getElementById("alarmData").innerHTML = obj.alarm;
+        document.getElementById("distanceData").innerHTML = obj.distance.toFixed(2) + " cm";
+        document.getElementById("movementData").innerHTML = obj.movement;
+        document.getElementById("userData").innerHTML = "User: " + obj.user;
+        document.getElementById("keyData").innerHTML = "Key: " + obj.key;
+        document.getElementById("latitudeData").innerHTML = "Latitude: " + obj.latitude.toFixed(4) + " " + obj.latitudeX;
+        document.getElementById("longitudeData").innerHTML = "Longitude: " + obj.longitude.toFixed(4) + " " + obj.longitudeY;
+        document.getElementById("celciusData").innerHTML = obj.celcius.toFixed(2) + "°C";
+        document.getElementById("farenheightData").innerHTML = obj.farenheight.toFixed(2) + "°F";
+        document.getElementById("humiduityData").innerHTML = obj.humidity.toFixed(2) + "%";
+    }, false);
+    }
+</script>
+</body>
 </html>
 )rawliteral";
