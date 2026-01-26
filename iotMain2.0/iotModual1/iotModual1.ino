@@ -150,7 +150,7 @@ void distanceRead() {
   duration = pulseIn(ECHO, HIGH, 20000); 
   distance = (duration * 0.0343) / 2; 
 
-  myData.dist = distance;
+  myData.dist = round(distance);
 
   if(distance < 20){
     myData.move = 1;
@@ -169,8 +169,8 @@ void tempHumRead() {
     Serial.println("Failed to read DHT11");
   }
   else {
-    myData.humi = humidity;
-    myData.celc = temperature_C;
-    myData.fara = temperature_F;
+    myData.humi = round(humidity);
+    myData.celc = round(temperature_C);
+    myData.fara = round(temperature_F);
   }
 }

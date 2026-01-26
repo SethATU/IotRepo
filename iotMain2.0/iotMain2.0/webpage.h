@@ -288,15 +288,15 @@ const char index_html[] PROGMEM = R"rawliteral()
         console.log("new_readings", e.data);
         var obj = JSON.parse(e.data);
         document.getElementById("alarmData").innerHTML = obj.alarm;
-        document.getElementById("distanceData").innerHTML = obj.distance.toFixed(2) + " cm";
+        document.getElementById("distanceData").innerHTML = Math.round(obj.distance) + " cm";
         document.getElementById("movementData").innerHTML = obj.movement;
         document.getElementById("userData").innerHTML = "User: " + obj.user;
         document.getElementById("keyData").innerHTML = "Key: " + obj.key;
         document.getElementById("latitudeData").innerHTML = "Latitude: " + obj.latitude.toFixed(4) + " " + obj.latitudeX;
         document.getElementById("longitudeData").innerHTML = "Longitude: " + obj.longitude.toFixed(4) + " " + obj.longitudeY;
-        document.getElementById("celciusData").innerHTML = obj.celcius.toFixed(2) + "°C";
-        document.getElementById("farenheightData").innerHTML = obj.farenheight.toFixed(2) + "°F";
-        document.getElementById("humiduityData").innerHTML = obj.humidity.toFixed(2) + "%";
+        document.getElementById("celciusData").innerHTML = Math.round(obj.celcius) + "°C";
+        document.getElementById("farenheightData").innerHTML = Math.round(obj.farenheight) + "°F";
+        document.getElementById("humiduityData").innerHTML = Math.round(obj.humidity) + "%";
     }, false);
     }
 </script>
